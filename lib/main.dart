@@ -15,7 +15,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: "BigSogo",
       home: StartActivity(),
-      theme: ThemeData(fontFamily: "Pretendard"),
+      theme: ThemeData(fontFamily: "Pretendard",
+      primaryColor: Color(0xFF4B66DC)),
       themeMode: ThemeMode.system,
     );
   }
