@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'log_in/first_activity.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -9,6 +11,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp();
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: "BigSogo",
+      home: StartActivity(),
+    );
   }
 }
+
+
