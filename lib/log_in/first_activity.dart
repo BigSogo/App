@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:bigsogo/log_in/regist_activity.dart';
 import 'login_activity.dart';
 
 class StartActivity extends StatefulWidget {
@@ -22,19 +23,52 @@ class _StartState extends State<StartActivity> {
                     height: 190,
                   ),
                 Padding(padding: EdgeInsets.only(bottom: 20)),
-                Text("궁금했지만 하지못한 질문들", style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black
-                ),),
-                Text("나는 어떻게 직장에 가야할까?", style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black
-                ),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("궁금했지만 하지못한 ", style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black
+                    ),),
+                    Text("질문", style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black
+                    ),),
+                    Text("들", style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.black
+                    ),),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("나는 ", style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black
+                    ),),
+                    Text("어떻게", style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black
+                    ),),
+                    Text(" 직장에 가야할까?", style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.black
+                    ),),
+                  ],
+                ),
                 Padding(padding: EdgeInsets.only(bottom: 200)),
                 Container(
                   width: double.infinity,
                   margin: EdgeInsets.symmetric(horizontal: 16), // 좌우 마진 조절
-                  child: ElevatedButton(onPressed: (){},
+                  child: ElevatedButton(onPressed: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => (Regist())),
+                    );
+                  },
                       style: ButtonStyle(
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
@@ -55,6 +89,7 @@ class _StartState extends State<StartActivity> {
                 Padding(padding: EdgeInsets.only(bottom: 20)),
                 
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children:  [
                     Text("이미 계정이 있으신가요?",
                     style: TextStyle(
@@ -71,14 +106,13 @@ class _StartState extends State<StartActivity> {
                         );
                       },
                       style: TextButton.styleFrom(
-                        backgroundColor: Color(0xFF4B66DC),
-                        minimumSize: Size(150, 50),
+                        minimumSize: Size(50, 50),
                       ),
                       child: Text(
                         "로그인",
                         style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.black,
+                          fontSize: 16,
+                          color: Color(0xFF4B66DC),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
