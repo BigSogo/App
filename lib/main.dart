@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'log_in/first_activity.dart';
 
+import 'package:fluttertoast/fluttertoast.dart';
+
 void main() {
   runApp(const MyApp());
 }
