@@ -1,4 +1,5 @@
 import 'package:bigsogo/log_in/regist_activity.dart';
+import 'package:bigsogo/main_service/bottom_service/navigation_controller.dart';
 import 'package:flutter/material.dart';
 
 
@@ -68,7 +69,7 @@ class _LogInState extends State<LogIn>{
                           onPressed: (){
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => Regist()),
+                              MaterialPageRoute(builder: (context) => BarControl()),
                             );
                           },
                           style: ButtonStyle(
