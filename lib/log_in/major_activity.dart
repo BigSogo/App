@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html';
 import 'package:bigsogo/main_service/other_service/search_result.dart';
 import 'package:flutter/material.dart';
 import 'package:bigsogo/log_in/login_activity.dart';
