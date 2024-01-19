@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
+// import 'dart:ffi';
+import 'dart:ui' show Size;
 
 import 'package:bigsogo/log_in/login_activity.dart';
 import 'package:bigsogo/log_in/major_activity.dart';
@@ -12,6 +15,27 @@ class Regist extends StatefulWidget {
 }
 
 class _RegistState extends State<Regist> {
+  // int countdown = 300;
+  // late Timer _timer;
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
+
+  // void startTimer(){
+  //   const oneSecond = Duration(seconds: 1);
+  //   _timer =  Timer.periodic(oneSecond, (Timer timer) {
+  //     if (countdown == 0) {
+  //       timer.cancel();
+  //     } else {
+  //       setState(() {
+  //         countdown--;
+  //       });
+  //     }
+  //   });
+  // }
+
   TextEditingController _textFieldController = TextEditingController();
   TextEditingController _PasswordController = TextEditingController();
   TextEditingController _confirmPasswordController = TextEditingController();
@@ -49,14 +73,13 @@ class _RegistState extends State<Regist> {
         : Container(); // 중복 검사를 통과하지 않은 경우 빈 컨테이너 반환
   }
 
-
   Future<void> sendUserDuplicateDataToServer() async {
     Widget verificationCodeWidget = buildVerificationCodeTextField(
       _verificationCodeController,
       isGood,
     );
     final url = Uri.parse('http://10.1.8.72:8080/user/email/duplicate').replace(
-      queryParameters: {'email' : _textFieldController.text.toString()}
+      queryParameters: {'email': _textFieldController.text.toString()},
     );
 
     try {
@@ -72,7 +95,13 @@ class _RegistState extends State<Regist> {
             fontSize: 20,
             toastLength: Toast.LENGTH_SHORT,
           );
-          // 클래스 내부에서 메서드 호출
+
+          // startTimer();
+
+          setState(() {
+            isGood = true; // 이 부분이 추가되었습니다.
+            // countdown = 300;
+          });
 
           print('중복 검사 통과: ${responseData['message']}');
           // 성공 시 추가적인 처리를 수행할 수 있습니다.
@@ -107,6 +136,7 @@ class _RegistState extends State<Regist> {
       // 예외 처리를 수행할 수 있습니다.
     }
   }
+
 
   Future<void> sendUserCodeToServer() async {
     final url = Uri.parse('http://10.1.8.72:8080/user/email/auth');
@@ -161,8 +191,17 @@ class _RegistState extends State<Regist> {
   }
 
   Future<void> sendUserDataToServer() async {
+    if (!isGood) {
+      Fluttertoast.showToast(
+        msg: "이메일 인증이 필요합니다.",
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 20,
+        toastLength: Toast.LENGTH_SHORT,
+      );
+      return;
+    }
 
-    final url = Uri.parse('http://10.1.8.72:8080/user/email/send');
+    final url = Uri.parse('http://10.1.8.72:8080/user/email/auth');
 
     try {
       final response = await http.post(
@@ -171,19 +210,25 @@ class _RegistState extends State<Regist> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'email': _textFieldController.text.toString(),
+          'email': _textFieldController.text,
+          'code': _verificationCodeController.text,
         }),
       );
-
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(utf8.decode(response.bodyBytes));
 
-        if (responseData['data'] == null) {
-          print('인증번호 전송 성공: ${responseData['message']}');
+        if (responseData['data'] == true) {
+          Fluttertoast.showToast(
+            msg: "인증 완료",
+            gravity: ToastGravity.BOTTOM,
+            fontSize: 20,
+            toastLength: Toast.LENGTH_SHORT,
+          );
+          print('인증코드 일치: ${responseData['message']}');
           // 성공 시 추가적인 처리를 수행할 수 있습니다.
         } else {
-          print('인증번호 전송 실패: ${responseData['message']}');
+          print('인증코드 불일치: ${responseData['message']}');
           // 실패 시 처리를 수행할 수 있습니다.
         }
       } else if (response.statusCode == 422) {
@@ -199,7 +244,7 @@ class _RegistState extends State<Regist> {
           print('유효성 검사 오류: 서버에서 제공한 형식과 다른 응답입니다.');
         }
       } else {
-        print('회원가입 실패: ${response.statusCode}');
+        print('인증코드 인증 실패: ${response.statusCode}');
         // 실패 시 처리를 수행할 수 있습니다.
       }
     } catch (e) {
@@ -299,6 +344,8 @@ class _RegistState extends State<Regist> {
                   top: 100,
                   child: ElevatedButton(
                     onPressed: () async {
+                      await sendUserDuplicateDataToServer();
+                      String textFieldValue = _textFieldController.text;
                       String verificationCodeController = _verificationCodeController.text;
                       if (verificationCodeController.isEmpty) {
                         Fluttertoast.showToast(
@@ -327,6 +374,11 @@ class _RegistState extends State<Regist> {
                 ),
               ],
             ),
+
+            // Text(
+            //   // '${countdown ~/ 60}:${(countdown%60).toString().padLeft(2, '0')}',
+            //   // style: TextStyle(fontSize: 20),
+            // ),
 
             isGood ? buildVerificationCodeTextField(_verificationCodeController, isGood) : Container(),
 
@@ -536,6 +588,8 @@ class _RegistState extends State<Regist> {
     );
   }
 }
+
+
 
 extension InputValidate on String {
   //이메일 포맷 검증
