@@ -1,5 +1,9 @@
 import 'package:bigsogo/log_in/regist_activity.dart';
+import 'package:bigsogo/main_service/bottom_service/navigation_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
+import 'dart:convert';
 
 
 class LogIn extends StatefulWidget {
@@ -8,8 +12,12 @@ class LogIn extends StatefulWidget {
 }
 
 class _LogInState extends State<LogIn>{
+  final logger = Logger();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  String? emailErrorText;
+  String? passwordErrorText;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,25 +58,34 @@ class _LogInState extends State<LogIn>{
                         onSubmitted: (_) => FocusScope.of(context).unfocus(),
                         obscureText: true,
 
-                        decoration: const InputDecoration(
+                        decoration:  InputDecoration(
                             hintText: "••••••••",
                             hintStyle:TextStyle(color:Color(0xFFB9B9B9)),
                             labelText: "비밀번호",
+                            errorText: passwordErrorText,
                             focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Color(0xFF4B66DC))
                             ),
                             focusColor: Color(0xFF4B66DC)
                         ),
                         cursorColor: Color(0xFF4B66DC),
+                          onChanged: (value) {
+                            setState(() {
+                              if(value.isEmpty){
+                                passwordErrorText = "값이 비어있습니다.";
+                              }
+                            });
+                          }
                       ),
                       const Padding(padding: EdgeInsets.only(bottom: 200),),
                       Container(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: (){
+                          onPressed: () {
+                            login();
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => Regist()),
+                              MaterialPageRoute(builder: (context) => BarControl()),
                             );
                           },
                           style: ButtonStyle(
@@ -131,5 +148,22 @@ class _LogInState extends State<LogIn>{
 
     );
   }
+  Future<int> login() async {
+    final url = Uri.parse("http://10.1.8.72:8080/user/login");
+    logger.d("message: ${emailController.value.text.toString()}, ${passwordController.value.text.toString()}");
+    final Map<String, dynamic> body  = {
+    "email": "test@test.com",
+    "password": "test"
+    };
+    logger.d("body: ${body}");
+    final response = await http.post(url, body:json.encode(body), headers: {'Content-Type': 'application/json'});
+    logger.d("statusCode : ${response.statusCode}");
+    logger.d("body : ${response.body}");
+    if (response.statusCode == 200){
+      return 200;
+    }
+    else{
+      return response.statusCode;
+    }
+  }
 }
-//testaasfsfsfsdfsf
