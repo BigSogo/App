@@ -20,6 +20,7 @@ String majorList = "";
 class BarControl extends StatefulWidget {
   @override
   State<BarControl> createState() => _BarControlState();
+
 }
 
 
@@ -32,7 +33,7 @@ class _BarControlState extends State<BarControl> {
     print("Future<SearchResult> 작동죔, keyWord: $keyword");
     try {
       final response = await http.get(
-        Uri.parse('http://10.1.8.72:8080/question/search?keyword=${keyword}')
+        Uri.parse('http://152.67.214.13:8080/question/search?keyword=${keyword}')
       );
 
       if (response.statusCode == 200) {
@@ -72,7 +73,7 @@ class _BarControlState extends State<BarControl> {
       print("터진곳 확인용 로그");
 
       final response = await http.get(
-        Uri.parse('http://10.1.8.72:8080/user/search?query=$keyword'),
+        Uri.parse('http://152.67.214.13:8080/user/search?query=$keyword'),
       headers: {'accept': 'application/json'});
 
       if (response.statusCode == 200) {
@@ -145,6 +146,23 @@ class _BarControlState extends State<BarControl> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            if (isSearchVisible) {
+              setState(() {
+                searchFocusNode.requestFocus();
+                isSearchVisible = false;
+                isSearchClicked = false;
+                _contentEditController.text = "";
+
+              });
+            }
+            else {
+              Navigator.pop(context);
+            }
+          },
+        ),
         title: isSearchVisible
             ? TextField(
           onEditingComplete: () {
@@ -156,7 +174,13 @@ class _BarControlState extends State<BarControl> {
               });
             }
             else {
-              isSearchClicked = false;
+              setState(() {
+                isSearchClicked = false;
+              });
+            }
+
+            if (isSearchVisible) {
+              searchFocusNode.requestFocus();
             }
 
           },
@@ -167,8 +191,7 @@ class _BarControlState extends State<BarControl> {
             hintText: "검색어를 입력하세요",
             border: InputBorder.none,
           ),
-        )
-            : Text(""),
+        ) : Text(""),
         actions: [
           GestureDetector(
             onTap: () {
@@ -181,7 +204,10 @@ class _BarControlState extends State<BarControl> {
 
 
                 } else {
-                  isSearchVisible = !isSearchClicked;
+                  setState(() {
+                    isSearchVisible = !isSearchVisible;
+                    isSearchClicked = false;
+                  });
                 }
 
                 if (isSearchVisible) {
@@ -219,8 +245,7 @@ class _BarControlState extends State<BarControl> {
             SafeArea(
               child: _widgetOptions.elementAt(_selectedIndex),
             ),
-            if (isSearchClicked)
-              Positioned.fill(
+            isSearchClicked ? Positioned.fill(
                 child: Column(
                   children: [
                     Container(
@@ -300,7 +325,7 @@ class _BarControlState extends State<BarControl> {
                             width: double.infinity,
                             height: double.infinity,
                             color: Colors.white,
-                            child: Text('사용자 검색 결과가 없습니다.'),
+                            child: Center(child: Text('사용자 검색 결과가 없습니다.')),
                           ),
                         ),
                       ),
@@ -354,14 +379,14 @@ class _BarControlState extends State<BarControl> {
                               width: double.infinity,
                               height: double.infinity,
                               color: Colors.white,
-                              child: Text('QnA 검색결과가 없습니다.'),
+                              child: Center(child: Text('QnA 검색결과가 없습니다.')),
                             ),
                           ),
                         ),
                       )
                   ],
                 ),
-              ),
+              ) : SizedBox.shrink(),
             ],
           ),
         ],
@@ -370,7 +395,7 @@ class _BarControlState extends State<BarControl> {
 
 
 
-        bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.question_answer),
