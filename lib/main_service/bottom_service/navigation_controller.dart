@@ -1,11 +1,20 @@
+import 'package:bigsogo/main_service/other_service/UserData.dart';
+import 'package:bigsogo/main_service/other_service/search_result.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigsogo/main_service/bottom_service/home_fragment.dart';
 import 'package:bigsogo/main_service/bottom_service/QnA_fragment.dart';
 import 'package:bigsogo/main_service/bottom_service/setting_fragment.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import '../other_service/notification_activity.dart';
-import '../other_service/search_result.dart';
+
+List<String> ProFileData = [];
+List<String> QnAData = [];
+List<List<String>> canUserData = [];
+String majorList = "";
 
 
 class BarControl extends StatefulWidget {
@@ -13,7 +22,115 @@ class BarControl extends StatefulWidget {
   State<BarControl> createState() => _BarControlState();
 }
 
+
 class _BarControlState extends State<BarControl> {
+
+  //===============//===============//===============//===============//===============//===============//===============//===============
+  //===============//===============//===============//===============//===============//===============//===============//===============
+
+  Future<SearchResult> fetchData(String keyword) async {
+    print("Future<SearchResult> 작동죔, keyWord: $keyword");
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.1.8.72:8080/question/search?keyword=${keyword}')
+      );
+
+      if (response.statusCode == 200) {
+        final SearchResult result = SearchResult.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+        print("QnAData : $QnAData"); // QnAData == []
+
+        await Future.delayed(Duration(seconds: 0)); // 비동기 동작 완료를 기다림
+        // result 객체를 사용하여 필요한 작업 수행
+          QnAData.clear(); // 데이터를 중복해서 추가하지 않도록 리스트를 비워줍니다.
+        print("result : ${result.data}");
+
+        setState(() {
+          for (int i = 0; i < result.data.length; i++) {
+            QnAData.add(result.data[i].title);
+          }
+        });
+
+        print("QnAData : $QnAData"); // QnAData == []
+
+
+        return result;
+      } else {
+        print('Failed to load data. Status code: ${response.statusCode}');
+        throw Exception('Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw e;
+    }
+  }
+
+  //===============//===============//===============//===============//===============//===============
+
+  Future<List<UserData>> fetchDataUser(String keyword) async {
+    print("Future<List<UserData>> 작동죔, keyWord: $keyword");
+    try {
+      print("터진곳 확인용 로그");
+
+      final response = await http.get(
+        Uri.parse('http://10.1.8.72:8080/user/search?query=$keyword'),
+      headers: {'accept': 'application/json'});
+
+      if (response.statusCode == 200) {
+        print("터진곳 확인용 로그1");
+        final Map<String, dynamic> decodedData = json.decode(utf8.decode(response.bodyBytes));
+        print("터진곳 확인용 로그2");
+
+        await Future.delayed(Duration(seconds: 0)); // 비동기 동작 완료를 기다림
+        // result 객체를 사용하여 필요한 작업 수행
+        QnAData.clear(); // 데이터를 중복해서 추가하지 않도록 리스트를 비워줍니다.
+        print("터진곳 확인용 로그3");
+
+        final List<dynamic> dataList = decodedData['data'] as List<dynamic>;
+        final List<UserData> userList = dataList.map((item) => UserData.fromJson(item)).toList();
+        print("터진곳 확인용 로그4");
+
+        setState(() {
+          canUserData.clear();
+          for (int i = 0; i < userList.length; i++) {
+            // 리스트의 길이를 확인하고 필요할 경우 초기화합니다.
+
+            List<String> row = [];
+            row.add(userList[i].profileImg);
+            row.add(userList[i].username);
+
+            // 각 행을 리스트에 추가합니다.
+            canUserData.add(row);
+
+            print("userList 넣은 후, 전체 : ${canUserData[i]}");
+
+            // majorList 초기화
+            majorList = "";
+
+            for (int j = 0; j < userList[i].major.length; j++) {
+              majorList += " #" + userList[i].major[j];
+            }
+          }
+        });
+        print("터진곳 확인용 로그5");
+
+
+        print("userList : $userList");
+
+        return userList;
+
+      } else {
+        print('Failed to load data. Status code: ${response.statusCode}');
+        throw Exception('Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw e;
+    }
+  }
+
+  //===============//===============//===============//===============//===============//===============
+  //===============//===============//===============//===============//===============//===============
+
   bool isSearchVisible = false;
   bool isSearchClicked = false;
   late FocusNode searchFocusNode;
@@ -21,37 +138,8 @@ class _BarControlState extends State<BarControl> {
 
   int _selectedIndex = 0;
 
-  static const data = [
-    "ChesPress",
-    "Squat",
-    "DeadLift",
-    "PullUp",
-    "OverHeadPress",
-  ];
-
-  final List<Widget> _widgetOptions = <Widget>[
-    QnA(),
-    Home(),
-    Setting(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    searchFocusNode = FocusNode(); // FocusNode 초기화
-  }
-
-  @override
-  void dispose() {
-    searchFocusNode.dispose(); // dispose에서 FocusNode 해제
-    super.dispose();
-  }
+  //===============//===============//===============//===============//===============
+  //===============//===============//===============//===============//===============
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +148,17 @@ class _BarControlState extends State<BarControl> {
         title: isSearchVisible
             ? TextField(
           onEditingComplete: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SearchResult()),
-            );
+            if (_contentEditController.text.isNotEmpty) {
+              setState(() {
+                isSearchClicked = true;
+                searchKeyword_QnA(_contentEditController.text);
+                searchKeyword_profile(_contentEditController.text);
+              });
+            }
+            else {
+              isSearchClicked = false;
+            }
+
           },
           controller: _contentEditController,
           focusNode: searchFocusNode,
@@ -79,16 +174,14 @@ class _BarControlState extends State<BarControl> {
             onTap: () {
               setState(() {
                 if (_contentEditController.text.isNotEmpty) {
-                  searchFocusNode.unfocus(); // 포커스 해제
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => SearchResult()),
-                  // );
 
-                  isSearchClicked = !isSearchClicked;
+                  isSearchClicked = true;
+                  searchKeyword_QnA(_contentEditController.text);
+                  searchKeyword_profile(_contentEditController.text);
+
 
                 } else {
-                  isSearchVisible = !isSearchVisible;
+                  isSearchVisible = !isSearchClicked;
                 }
 
                 if (isSearchVisible) {
@@ -118,34 +211,166 @@ class _BarControlState extends State<BarControl> {
           ),
         ),
       ),
+
       body: Stack(
         children: [
-          SafeArea(
-            child: _widgetOptions.elementAt(_selectedIndex),
-          ),
-          isSearchClicked ? ListView.builder(
-            itemCount: data.length,
-            itemBuilder: (BuildContext context , int index) {
-              return GestureDetector(
-                onTap: () {
-                  print(index);
-                },
-                child: Card(
-                  color: Colors.blue, // 배경색
-                  margin: EdgeInsets.zero,
-                  elevation: 8, // 그림자 높이
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(0.0), // Card 테두리 모양
-                  ),
-                  child: Text(data[index]),
+          Stack(
+          children: [
+            SafeArea(
+              child: _widgetOptions.elementAt(_selectedIndex),
+            ),
+            if (isSearchClicked)
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    Container(
+                      color: Colors.white,
+                      width: double.infinity,
+                      child: Text(
+                        "ProFile",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: Colors.white,
+                        child: canUserData.length > 0
+                            ? ListView.builder(
+                          itemCount: canUserData.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return GestureDetector(
+                              onTap: () {
+                                print(index);
+                              },
+                              child: Container(
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  color: Colors.white, // 배경색
+                                  borderRadius: BorderRadius.circular(8), // Card 테두리 모양
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey,
+                                      offset: Offset(0, 2),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      child: Image.network(
+                                        canUserData[index][0],
+                                        width: 70,
+                                        height: 70,
+                                        fit: BoxFit.cover, // 이미지를 원에 맞게 잘라내기 위해 BoxFit 설정
+                                      ),
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text(canUserData[index][1]),
+                                        Container(
+                                          height: 20,
+                                          child: RichText(
+                                            text: TextSpan(
+                                              text: majorList,
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+
+                                      ],
+                                    )
+                                    
+                                  ]
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                            : Center(
+                          child: Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            color: Colors.white,
+                            child: Text('사용자 검색 결과가 없습니다.'),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    Container(
+                      color: Colors.white,
+                      width: double.infinity,
+                      child: Text(
+                        "QnA",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+
+                    Expanded(
+                        child: Container(
+                          color: Colors.white,
+                          child: QnAData.length > 0
+                              ? ListView.builder(
+                            itemCount: QnAData.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  print(index);
+                                },
+                                child: Container(
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white, // 배경색
+                                    borderRadius: BorderRadius.circular(8), // Card 테두리 모양
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey,
+                                        offset: Offset(0, 2),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Text(QnAData[index]),
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                              : Center(
+                            child: Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              color: Colors.white,
+                              child: Text('QnA 검색결과가 없습니다.'),
+                            ),
+                          ),
+                        ),
+                      )
+                  ],
                 ),
-              );
-            },
-          ): Text("")
+              ),
+            ],
+          ),
         ],
       ),
 
-      bottomNavigationBar: BottomNavigationBar(
+
+
+
+        bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.question_answer),
@@ -165,5 +390,42 @@ class _BarControlState extends State<BarControl> {
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  //===============//===============//===============//===============//===============//===============
+  //===============//===============//===============//===============//===============//===============
+
+  void searchKeyword_QnA(String searchWord) {
+    String keyword = Uri.encodeComponent(searchWord); // 한글 등의 특수문자를 URL 인코딩
+    fetchData(keyword);
+  }
+  void searchKeyword_profile(String searchWord) {
+    String keyword = Uri.encodeComponent(searchWord); // 한글 등의 특수문자를 URL 인코딩
+    fetchDataUser(keyword);
+  }
+
+
+  final List<Widget> _widgetOptions = <Widget>[
+    QnA(),
+    Home(),
+    Setting(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    searchFocusNode = FocusNode(); // FocusNode 초기화
+  }
+
+  @override
+  void dispose() {
+    searchFocusNode.dispose(); // dispose에서 FocusNode 해제
+    super.dispose();
   }
 }
