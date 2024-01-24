@@ -84,11 +84,11 @@ class _LogInState extends State<LogIn>{
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => BarControl()),
-                            );
-                            // login();
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(builder: (context) => BarControl()),
+                            // );
+                            login();
                           },
                           style: ButtonStyle(
                             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
