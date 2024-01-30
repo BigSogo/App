@@ -84,11 +84,11 @@ class _LogInState extends State<LogIn>{
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(builder: (context) => BarControl()),
-                            // );
-                            login();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => BarControl()),
+                            );
+                            // login();
                           },
                           style: ButtonStyle(
                             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -154,35 +154,35 @@ class _LogInState extends State<LogIn>{
   @override void initState() {
     super.initState();
   }
-
-  static final storage = FlutterSecureStorage(); // FlutterSecureStorage를 storage로 저장
-  dynamic userInfo = ''; // storage에 있는 유저 정보를 저장
-
-  void login() async {
-    final url = Uri.parse("http://10.1.8.72:8080/user/login");
-    final Map<String, dynamic> body  = {
-      "email": "${emailController.value.text}",
-      "password": "${passwordController.value.text}"
-    };
-    final response = await http.post(url, body:json.encode(body), headers: {'Content-Type': 'application/json'});
-    logger.d("statusCode : ${response.statusCode}");
-    logger.d("body : ${response.body}");
-    if (response.statusCode == 200){
-      var result = BaseData<String>.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
-      logger.d("body : ${result.message}");
-      await storage.write(
-        key: 'login',
-        value: result.data,
-      );
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => BarControl()),
-      );
-    }
-    else{
-      logger.e("message : ${response.body}");
-    }
-  }
+  //
+  // static final storage = FlutterSecureStorage(); // FlutterSecureStorage를 storage로 저장
+  // dynamic userInfo = ''; // storage에 있는 유저 정보를 저장
+  //
+  // void login() async {
+  //   final url = Uri.parse("http://152.67.214.13:8080/user/login");
+  //   final Map<String, dynamic> body  = {
+  //     "email": "${emailController.value.text}",
+  //     "password": "${passwordController.value.text}"
+  //   };
+  //   final response = await http.post(url, body:json.encode(body), headers: {'Content-Type': 'application/json'});
+  //   logger.d("statusCode : ${response.statusCode}");
+  //   logger.d("body : ${response.body}");
+  //   if (response.statusCode == 200){
+  //     var result = BaseData<String>.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+  //     logger.d("body : ${result.message}");
+  //     await storage.write(
+  //       key: 'login',
+  //       value: result.data,
+  //     );
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => BarControl()),
+  //     );
+  //   }
+  //   else{
+  //     logger.e("message : ${response.body}");
+  //   }
+  // }
 }
 
 

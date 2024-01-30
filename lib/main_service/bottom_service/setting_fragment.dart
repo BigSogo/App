@@ -15,7 +15,7 @@ class Setting extends StatefulWidget {
   _SettingState createState() => _SettingState();
 }
 
-class _SettingState extends State<Setting>{
+class _SettingState extends State<Setting> {
   Logger logger = Logger();
   static final storage = FlutterSecureStorage(); // FlutterSecureStorage를 storage로 저장
   dynamic userInfo = ''; // storage에 있는 유저 정보를 저장
@@ -30,7 +30,8 @@ class _SettingState extends State<Setting>{
     logger.d("message");
     final response = await http
         .get(Uri.parse("http://10.1.8.72:8080/profile/{$userId}"));
-    var result = BaseData<UserProfile>.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+    var result = BaseData<UserProfile>.fromJson(
+        jsonDecode(utf8.decode(response.bodyBytes)));
     if (response.statusCode == 200) {
       logger.d(result.data);
       return result;
@@ -39,19 +40,22 @@ class _SettingState extends State<Setting>{
       throw Exception('Failed to load album');
     }
   }
+
   _asyncMethod() async {
     // read 함수로 key값에 맞는 정보를 불러오고 데이터타입은 String 타입
     // 데이터가 없을때는 null을 반환
-    userInfo = await storage.read(key:'login');
+    userInfo = await storage.read(key: 'login');
 
     // user의 정보가 있다면 로그인 후 들어가는 첫 페이지로 넘어가게 합니다.
     if (userInfo != null) {
       logger.d("statusCode : ${userInfo}");
-      final response = await http.get(Uri.parse("http://10.1.8.72:8080/user"), headers: {HttpHeaders.authorizationHeader:userInfo});
+      final response = await http.get(Uri.parse("http://10.1.8.72:8080/user"),
+          headers: {HttpHeaders.authorizationHeader: userInfo});
 
-      var result = BaseUserData.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+      var result = BaseUserData.fromJson(
+          jsonDecode(utf8.decode(response.bodyBytes)));
       logger.d("statusCode : ${result.data}");
-      if (result.code == 200){
+      if (result.code == 200) {
         getMyProfile(result.data);
       }
     } else {
@@ -77,96 +81,101 @@ class _SettingState extends State<Setting>{
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body:Column(
+      body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            color: Color(0xFFF5FBFF),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(26, 26, 26, 26),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children:  [
-                      Image.network(
-                        'https://static.wikia.nocookie.net/p__/images/8/8a/Shiro_.png/revision/latest?cb=20210703182454&path-prefix=protagonist',
-                        width: 70,
-                        height: 70,
-                        fit: BoxFit.cover,
-                      ),
-                      const SizedBox(width: 13,),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(name,
+              color: Color(0xFFF5FBFF),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(26, 26, 26, 26),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Image.network(
+                          'https://static.wikia.nocookie.net/p__/images/8/8a/Shiro_.png/revision/latest?cb=20210703182454&path-prefix=protagonist',
+                          width: 70,
+                          height: 70,
+                          fit: BoxFit.cover,
+                        ),
+                        const SizedBox(width: 13,),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(name,
+                                textAlign: TextAlign.start,
+                                style: const TextStyle(
+                                    fontSize: 24,
+                                    fontFamily: "Pretendard",
+                                    fontWeight: FontWeight.w500
+                                )),
+                            Image.network(
+                              'https://api.surfit.io/v1/category/content-cover/develop/git/2x',
+                              width: 38,
+                              height: 38,
+                              fit: BoxFit.cover,
+                            ),
+                          ],),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextButton(onPressed: () {},
+                          child: Text("#Android",
                               textAlign: TextAlign.start,
                               style: const TextStyle(
-                                  fontSize: 24,
+                                  fontSize: 14,
                                   fontFamily: "Pretendard",
-                                  fontWeight:FontWeight.w500
-                              )),
-                          Image.network(
-                            'https://api.surfit.io/v1/category/content-cover/develop/git/2x',
-                            width: 38,
-                            height: 38,
-                            fit: BoxFit.cover,
-                          ),
-                        ],),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextButton(onPressed: () {},
-                        child: Text("#Android",
-                          textAlign: TextAlign.start,
-                          style: const TextStyle(
-                              fontSize: 14,
-                              fontFamily: "Pretendard",
-                              fontWeight:FontWeight.w500
-                          )),),
-                      SizedBox(width: 3,),
-                      TextButton(onPressed: () {},
-                        child: Text("#Ai",
-                            textAlign: TextAlign.start,
-                            style: const TextStyle(
-                                fontSize: 14,
-                                fontFamily: "Pretendard",
-                                fontWeight:FontWeight.w500
-                            )),),
-                    ],
-                  ),
-                  SizedBox(height: 13,),
-                  Container(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                          onPressed: (){},
+                                  fontWeight: FontWeight.w500
+                              )),),
+                        SizedBox(width: 3,),
+                        TextButton(onPressed: () {},
+                          child: Text("#Ai",
+                              textAlign: TextAlign.start,
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: "Pretendard",
+                                  fontWeight: FontWeight.w500
+                              )),),
+                      ],
+                    ),
+                    SizedBox(height: 13,),
+                    Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {},
                           style: ButtonStyle(
-                            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15.0), // 각지게 만들기 위한 값
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      15.0), // 각지게 만들기 위한 값
                                 )),
-                            backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF4B66DC)),
-                            fixedSize: MaterialStateProperty.all<Size>(Size.fromHeight(50)), // 높이는 고정, 가로는 디바이스에 맞추어 유동적으로
-                              ),
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Color(0xFF4B66DC)),
+                            fixedSize: MaterialStateProperty.all<Size>(
+                                Size.fromHeight(
+                                    50)), // 높이는 고정, 가로는 디바이스에 맞추어 유동적으로
+                          ),
                           child: const Text(
                               "내 QnA 보기",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontSize: 14,
                                   fontFamily: "Pretendard",
-                                  fontWeight:FontWeight.normal,
-                                color: Color(0xFFFFFFFF)
+                                  fontWeight: FontWeight.normal,
+                                  color: Color(0xFFFFFFFF)
                               )),
-                      )
-                  )
-                ],
-              ),)
+                        )
+                    )
+                  ],
+                ),)
 
           ),
           const SizedBox(height: 3,),
@@ -184,5 +193,3 @@ class _SettingState extends State<Setting>{
     );
   }
 }
-
-

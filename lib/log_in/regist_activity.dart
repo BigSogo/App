@@ -78,7 +78,7 @@ class _RegistState extends State<Regist> {
       _verificationCodeController,
       isGood,
     );
-    final url = Uri.parse('http://10.1.8.72:8080/user/email/duplicate').replace(
+    final url = Uri.parse('http://152.67.214.13:8080/user/email/duplicate').replace(
       queryParameters: {'email': _textFieldController.text.toString()},
     );
 
@@ -139,7 +139,7 @@ class _RegistState extends State<Regist> {
 
 
   Future<void> sendUserCodeToServer() async {
-    final url = Uri.parse('http://10.1.8.72:8080/user/email/auth');
+    final url = Uri.parse('http://152.67.214.13/user/email/auth');
 
     try {
       final response = await http.post(
@@ -201,7 +201,7 @@ class _RegistState extends State<Regist> {
       return;
     }
 
-    final url = Uri.parse('http://10.1.8.72:8080/user/email/auth');
+    final url = Uri.parse('http://152.67.214.13/user/email/auth');
 
     try {
       final response = await http.post(
