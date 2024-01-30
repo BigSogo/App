@@ -22,9 +22,7 @@ class _QnAState extends State<QnA> {
   Future<List<Data>> fetchData() async {
     try {
       final response = await http.get(
-        // Uri.parse('http://10.1.8.72:8080/question/list'),
         Uri.parse('http://10.1.8.72:8080/question/list'),
-
       );
       if (response.statusCode == 200) {
         final MyModel myModel =

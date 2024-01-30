@@ -223,7 +223,6 @@ class _SettingState extends State<Setting> {
                                   fontWeight: FontWeight.bold
                                 )),
                             Container(
-                              margin: EdgeInsets.only(top: 2,left: 2),
                               padding: EdgeInsets.only(right: 28),
                               child: Text(
                                 "${testContentsInfo[idx - 1]}",

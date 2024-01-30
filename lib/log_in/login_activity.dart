@@ -20,6 +20,8 @@ class _LogInState extends State<LogIn>{
   final passwordController = TextEditingController();
   String? emailErrorText;
   String? passwordErrorText;
+  bool isPassword = false;
+  bool isEmail = false;
 
   @override
   Widget build(BuildContext context) {
@@ -58,12 +60,15 @@ class _LogInState extends State<LogIn>{
                             setState(() {
                               if(value.isEmpty){
                                 emailErrorText = "값이 비어있습니다.";
+                                isEmail = false;
                               }
                               else if(!value.contains("@") || !value.contains(".com")){
                                 emailErrorText = "이메일 형식이 맞지 않습니다.";
+                                isEmail = false;
                               }
                               else{
                                 emailErrorText = null;
+                                isEmail = true;
                               }
                             });
                           }
@@ -93,12 +98,15 @@ class _LogInState extends State<LogIn>{
                             setState(() {
                               if(value.isEmpty){
                                 passwordErrorText = "값이 비어있습니다.";
+                                isPassword = false;
                               }
                               else if(value.length < 8){
                                 passwordErrorText = "비밀번호는 8자리 이상이여야됨니다.";
+                                isPassword = false;
                               }
                               else if(value.length >= 8){
                                 passwordErrorText = null;
+                                isPassword = true;
                               }
                             });
                           }
@@ -108,11 +116,14 @@ class _LogInState extends State<LogIn>{
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => BarControl()),
-                            );
-                            // login();
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(builder: (context) => BarControl()),
+                            // );
+                            if (isPassword && isEmail){
+                              login();
+                            }
+                            login();
                           },
                           style: ButtonStyle(
                             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
