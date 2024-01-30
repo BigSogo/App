@@ -3,6 +3,7 @@ import 'package:bigsogo/log_in/regist_activity.dart';
 import 'package:bigsogo/main_service/bottom_service/navigation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:convert';
@@ -19,6 +20,8 @@ class _LogInState extends State<LogIn>{
   final passwordController = TextEditingController();
   String? emailErrorText;
   String? passwordErrorText;
+  bool isPassword = false;
+  bool isEmail = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,22 +45,42 @@ class _LogInState extends State<LogIn>{
                         autofocus: true,
                         textInputAction: TextInputAction.next,
                         onSubmitted: (_) => FocusScope.of(context).nextFocus(),
-                        decoration:const InputDecoration(hintText: "example@sogo.com",
+                        decoration: InputDecoration(hintText: "example@sogo.com",
 
                             hintStyle:TextStyle(color:Color(0xFFB9B9B9),),
                             labelText: "이메일",
+                            errorText: emailErrorText,
                             focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Color(0xFF4B66DC))
                             ),
                             focusColor: Color(0xFF4B66DC)
                         ),
                         cursorColor: Color(0xFF4B66DC),
+                          onChanged: (value) {
+                            setState(() {
+                              if(value.isEmpty){
+                                emailErrorText = "값이 비어있습니다.";
+                                isEmail = false;
+                              }
+                              else if(!value.contains("@") || !value.contains(".com")){
+                                emailErrorText = "이메일 형식이 맞지 않습니다.";
+                                isEmail = false;
+                              }
+                              else{
+                                emailErrorText = null;
+                                isEmail = true;
+                              }
+                            });
+                          }
                       ),
                       const SizedBox(height: 20),
                       TextField(
                         controller: passwordController,
                         textInputAction: TextInputAction.done,
-                        onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                        onSubmitted: (_) => {
+                          logger.d("message"),
+                          FocusScope.of(context).unfocus()
+                        },
                         obscureText: true,
 
                         decoration:  InputDecoration(
@@ -75,6 +98,15 @@ class _LogInState extends State<LogIn>{
                             setState(() {
                               if(value.isEmpty){
                                 passwordErrorText = "값이 비어있습니다.";
+                                isPassword = false;
+                              }
+                              else if(value.length < 8){
+                                passwordErrorText = "비밀번호는 8자리 이상이여야됨니다.";
+                                isPassword = false;
+                              }
+                              else if(value.length >= 8){
+                                passwordErrorText = null;
+                                isPassword = true;
                               }
                             });
                           }
@@ -84,11 +116,14 @@ class _LogInState extends State<LogIn>{
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => BarControl()),
-                            );
-                            // login();
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(builder: (context) => BarControl()),
+                            // );
+                            if (isPassword && isEmail){
+                              login();
+                            }
+                            login();
                           },
                           style: ButtonStyle(
                             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -159,14 +194,15 @@ class _LogInState extends State<LogIn>{
   dynamic userInfo = ''; // storage에 있는 유저 정보를 저장
 
   void login() async {
-    final url = Uri.parse("http://10.1.8.72:8080/user/login");
+    final url = Uri.parse("http://152.67.214.13:8080/user/login");
     final Map<String, dynamic> body  = {
       "email": "${emailController.value.text}",
       "password": "${passwordController.value.text}"
     };
     final response = await http.post(url, body:json.encode(body), headers: {'Content-Type': 'application/json'});
     logger.d("statusCode : ${response.statusCode}");
-    logger.d("body : ${response.body}");
+    logger.d("body : ${body}");
+    logger.d("body : ${jsonDecode(utf8.decode(response.bodyBytes))}");
     if (response.statusCode == 200){
       var result = BaseData<String>.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
       logger.d("body : ${result.message}");
@@ -181,6 +217,12 @@ class _LogInState extends State<LogIn>{
     }
     else{
       logger.e("message : ${response.body}");
+      Fluttertoast.showToast(
+        msg: "이메일 또는 비밀번호가 다름니다. 확인 후 다시입력해주세요.",
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 20,
+        toastLength: Toast.LENGTH_SHORT,
+      );
     }
   }
 }
