@@ -1,9 +1,10 @@
+import 'package:bigsogo/main_service/bottom_service/question/QuestionAnswer.dart';
 import 'package:bigsogo/main_service/other_service/create_question.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../other_service/publickQ_data.dart';
+import '../../other_service/publickQ_data.dart';
 
 List<List<String>> canViewQList = [];
 String majorList = "";
@@ -44,11 +45,13 @@ class _QnAState extends State<QnA> {
             row.add(dataList[i].writer.username);
             row.add(dataList[i].content);
 
-            canViewQList.add(row);
-
             for (int j = 0; j < dataList[i].writer.major.length; j++) {
               majorList += " #" + (dataList[i].writer.major[j]);
             }
+
+            row.add(majorList);
+
+            canViewQList.add(row);
           }
           print("canViewList : $canViewQList");
 
@@ -79,6 +82,14 @@ class _QnAState extends State<QnA> {
           return GestureDetector(
             onTap: () {
               print(canViewQList[index][0]);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => QAnswer(
+                    canViewQList[index],
+                  ),
+                ),
+              );
             },
             child: Container(
               height: 200,
@@ -105,24 +116,29 @@ class _QnAState extends State<QnA> {
                             " Q. " + canViewQList[index][1],
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 25,
+                              fontSize: 22,
                             ),
                           ),
                         ],
                       ),
                       Container(
                         height: 70,
-                        child: RichText(
-                          text: TextSpan(
-                            text: canViewQList[index][4],
-                            style: TextStyle(
-                              fontWeight: FontWeight.w300,
-                              fontSize: 15,
-                              color: Color(0xFF343434),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                text: canViewQList[index][4],
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 15,
+                                  color: Color(0xFF343434),
+                                ),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
                             ),
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
+                          ],
                         ),
                       ),
                       Row(
@@ -131,6 +147,7 @@ class _QnAState extends State<QnA> {
                           ClipOval(
                             child: Image.network(
                               canViewQList[index][2],
+                              // "https://static-cdn.jtvnw.net/jtv_user_pictures/ecd6ee59-9f18-4eec-b8f3-63cd2a9127a5-profile_image-300x300.png",
                               width: 70,
                               height: 70,
                               fit: BoxFit.cover,
@@ -140,11 +157,10 @@ class _QnAState extends State<QnA> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Container(
-                                width: 250,
+                                width: 270,
                                 height: 20,
                                 child: Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Text(
                                       canViewQList[index][3],
@@ -157,10 +173,12 @@ class _QnAState extends State<QnA> {
                                 ),
                               ),
                               Container(
+                                margin: EdgeInsets.fromLTRB(15, 0, 0, 0),
                                 height: 20,
+                                width: 300,
                                 child: RichText(
                                   text: TextSpan(
-                                    text: majorList,
+                                    text: canViewQList[index][5],
                                     style: TextStyle(
                                       fontSize: 10,
                                     ),
