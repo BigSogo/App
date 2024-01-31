@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bigsogo/main_service/bottom_service/navigation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -109,7 +110,7 @@ class _CreateQState extends State<CreateQ> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => QnA()
+            builder: (context) => BarControl()
           ),
         );
         // 화면 갱신
