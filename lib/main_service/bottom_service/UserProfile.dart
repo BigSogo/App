@@ -28,8 +28,8 @@ class UserProfile{
   });
   factory UserProfile.fromJson(Map<String, dynamic> json){
     return UserProfile(
-        user: json['user'],
-        profiles: json['profiles']
+        user: UserDataJS.fromJson(json['user']),
+        profiles: List<ProfileProfilesData>.from(json['profiles'])
     );
   }
 }
@@ -57,7 +57,7 @@ class UserDataJS{
         email: json['email'],
         username: json['username'],
         description: json['description'],
-        major: json['major']
+        major: List<String>.from(json['major']),
     );
   }
 }
