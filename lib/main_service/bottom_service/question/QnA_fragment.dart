@@ -133,17 +133,17 @@ class _QnAState extends State<QnA> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            RichText(
-                              text: TextSpan(
-                                text: canViewQList[index][4],
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  fontSize: 15,
-                                  color: Color(0xFF343434),
-                                ),
+                            Expanded(
+                              child: Text(
+                                  canViewQList[index][4],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 15,
+                                    color: Color(0xFF343434),
+                                  ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
                             ),
                           ],
                         ),

@@ -288,15 +288,17 @@ class _QAnswerState extends State<QAnswer>{
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            RichText(
-                              text: TextSpan(
-                                text: widget.clickQList[4],
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  fontSize: 15,
-                                  color: Color(0xFF343434),
+                            Expanded(
+                              child: Text(
+                                  widget.clickQList[4],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 15,
+                                    color: Color(0xFF343434),
+                                  ),
+                                maxLines: 20,
+                                overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
                             ),
                           ],
                         ),
@@ -355,7 +357,8 @@ class _QAnswerState extends State<QAnswer>{
                 ),
               ),
             ),
-        
+
+
              // 이 부분에 ListView.builder를 사용해서 commentList값 넣기
             commentList.length > 0 ? Padding(
               padding: const EdgeInsets.all(8.0),
@@ -407,10 +410,13 @@ class _QAnswerState extends State<QAnswer>{
                                                   fontSize: 12
                                               ),),
         
-                                            IconButton(onPressed: (){
-                                                _showMoreOptions(context, int.parse(commentList[index][0]));
-        
-                                                }, icon: Icon(Icons.more_vert)),
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 100),
+                                              child: IconButton(onPressed: (){
+                                                  _showMoreOptions(context, int.parse(commentList[index][0]));
+
+                                                  }, icon: Icon(Icons.more_vert)),
+                                            ),
         
                                           ],
                                         ),
