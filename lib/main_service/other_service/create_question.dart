@@ -278,8 +278,8 @@ class _CreateQState extends State<CreateQ> {
                   bottom: 40,
                   right: 40,
                   child: Container(
-                    width: 50,
-                    height: 35,
+                    width: 60,
+                    height: 40,
                     child: TextButton(
                       onPressed: () {
                         if (_isSubmitButtonEnabled) {
@@ -310,6 +310,8 @@ class _CreateQState extends State<CreateQ> {
                       child: Text(
                         "제출",
                         style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),

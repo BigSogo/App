@@ -210,17 +210,29 @@ class _QnAState extends State<QnA> {
           : Center(
         child: Text("QnA가 없습니다."),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // 버튼을 눌렀을 때 수행할 동작
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CreateQ()),
-          );
-        },
-        child: Icon(Icons.add),
+      floatingActionButton: Container(
+        width: 65, // 원하는 가로 크기 설정
+        height: 65, // 원하는 세로 크기 설정
+        child: FloatingActionButton(
+          backgroundColor: Color(0xFF4C66DC),
+          onPressed: () {
+            // 버튼을 눌렀을 때 수행할 동작
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CreateQ()),
+            );
+          },
+          child: Icon(Icons.edit, color: Colors.white),
+          heroTag: 'uniqueHeroTag', // 고유한 태그 지정
+          elevation: 6, // 그림자 크기 조절
+          mini: false, // 큰 크기로 설정
+          shape: RoundedRectangleBorder( // 버튼 모양 설정
+            borderRadius: BorderRadius.circular(100), // 반지름을 크기의 절반으로 설정하여 동그랗게 보이도록 함
+          ),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
     );
   }
 }
