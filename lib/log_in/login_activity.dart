@@ -140,7 +140,7 @@ class _LogInState extends State<LogIn>{
                           child: const Text(
                             "로그인", style: TextStyle(
                             color: Colors.white,
-                            fontFamily: "Pretendard",
+                            fontFamily: "Pretendarfd",
                             fontSize: 13,
                           ),),
                         ),
