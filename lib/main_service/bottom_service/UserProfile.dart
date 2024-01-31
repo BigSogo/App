@@ -83,4 +83,4 @@ class ProfileProfilesData{
         portfolio_url: json['portfolio_url']
     );
   }
-}
+} //test용
