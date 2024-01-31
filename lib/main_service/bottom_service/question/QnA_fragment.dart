@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../../other_service/publickQ_data.dart';
+import 'package:bigsogo/main_service/data/publickQ_data.dart';
 
 List<List<String>> canViewQList = [];
 String majorList = "";
@@ -45,11 +45,13 @@ class _QnAState extends State<QnA> {
             row.add(dataList[i].writer.username);
             row.add(dataList[i].content);
 
+
             for (int j = 0; j < dataList[i].writer.major.length; j++) {
               majorList += " #" + (dataList[i].writer.major[j]);
             }
 
             row.add(majorList);
+
 
             canViewQList.add(row);
           }
@@ -148,8 +150,8 @@ class _QnAState extends State<QnA> {
                             child: Image.network(
                               canViewQList[index][2],
                               // "https://static-cdn.jtvnw.net/jtv_user_pictures/ecd6ee59-9f18-4eec-b8f3-63cd2a9127a5-profile_image-300x300.png",
-                              width: 70,
-                              height: 70,
+                              width: 80,
+                              height: 80,
                               fit: BoxFit.cover,
                             ),
                           ),

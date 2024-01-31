@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:bigsogo/BaseData.dart';
+import 'package:bigsogo/main_service/data/BaseData.dart';
 import 'package:bigsogo/main_service/bottom_service/UserDataModel.dart';
 import 'package:bigsogo/main_service/bottom_service/UserProfile.dart';
 import 'package:flutter/material.dart';

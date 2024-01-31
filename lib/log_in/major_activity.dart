@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:bigsogo/main_service/other_service/search_result.dart';
+import 'package:bigsogo/main_service/data/search_result.dart';
 import 'package:flutter/material.dart';
 import 'package:bigsogo/log_in/login_activity.dart';
 import 'package:http/http.dart' as http;

@@ -1,5 +1,5 @@
-import 'package:bigsogo/main_service/other_service/UserData.dart';
-import 'package:bigsogo/main_service/other_service/search_result.dart';
+import 'package:bigsogo/main_service/data/UserData.dart';
+import 'package:bigsogo/main_service/data/search_result.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigsogo/main_service/bottom_service/home_fragment.dart';
