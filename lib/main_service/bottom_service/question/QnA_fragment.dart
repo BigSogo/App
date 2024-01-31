@@ -1,8 +1,10 @@
+import 'package:bigsogo/main_service/bottom_service/question/QuestionAnswer.dart';
+import 'package:bigsogo/main_service/other_service/create_question.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../other_service/publickQ_data.dart';
+import 'package:bigsogo/main_service/data/publickQ_data.dart';
 
 List<List<String>> canViewQList = [];
 String majorList = "";
@@ -19,10 +21,12 @@ class _QnAState extends State<QnA> {
     fetchData(); // initState에서 fetchData 호출
   }
 
+  var isQnaHaving = true;
+
   Future<List<Data>> fetchData() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.1.8.72:8080/question/list'),
+        Uri.parse('http://152.67.214.13:8080/question/list'),
       );
       if (response.statusCode == 200) {
         final MyModel myModel =
@@ -34,6 +38,7 @@ class _QnAState extends State<QnA> {
           majorList = ""; // 기존 데이터를 지우고 다시 초기화
 
           for (int i = 0; i < dataList.length; i++) {
+            majorList = ""; // 기존 데이터를 지우고 다시 초기화
             List<String> row = [];
             row.add(dataList[i].id.toString());
             row.add(dataList[i].title);
@@ -41,14 +46,21 @@ class _QnAState extends State<QnA> {
             row.add(dataList[i].writer.username);
             row.add(dataList[i].content);
 
-            canViewQList.add(row);
 
             for (int j = 0; j < dataList[i].writer.major.length; j++) {
               majorList += " #" + (dataList[i].writer.major[j]);
             }
+
+            row.add(majorList);
+
+
+            canViewQList.add(row);
           }
           print("canViewList : $canViewQList");
 
+          if (canViewQList.isEmpty) {
+            isQnaHaving = false;
+          }
         });
 
         return dataList;
@@ -66,15 +78,24 @@ class _QnAState extends State<QnA> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
+      body: isQnaHaving
+          ? ListView.builder(
         itemCount: canViewQList.length,
         itemBuilder: (BuildContext context, int index) {
           return GestureDetector(
             onTap: () {
               print(canViewQList[index][0]);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => QAnswer(
+                    canViewQList[index],
+                  ),
+                ),
+              );
             },
             child: Container(
-              height: 200,
+              height: 240,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -93,76 +114,91 @@ class _QnAState extends State<QnA> {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
-
                         children: [
-                          Text( " Q. "+ canViewQList[index][1], style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 25,
-                          ),),
-                        ],
-                      ),
-
-                      Container(
-                        height: 70,
-                        child: RichText(
-                          text: TextSpan(
-                            text: canViewQList[index][4],
-                            style: TextStyle(
-                              fontWeight: FontWeight.w300,
-                              fontSize: 15,
-                              color: Color(0xFF343434),
+                          Expanded(
+                            child: Text(
+                              " Q. " + canViewQList[index][1],
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 22,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
+                        ],
+                      ),
+                      Container(
+                        height: 70,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                  canViewQList[index][4],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 15,
+                                    color: Color(0xFF343434),
+                                  ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
-
                         children: [
                           ClipOval(
                             child: Image.network(
                               canViewQList[index][2],
-                              width: 70,
-                              height: 70,
-                              fit: BoxFit.cover, // 이미지를 원에 맞게 잘라내기 위해 BoxFit 설정
+                              // "https://static-cdn.jtvnw.net/jtv_user_pictures/ecd6ee59-9f18-4eec-b8f3-63cd2a9127a5-profile_image-300x300.png",
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
                             ),
                           ),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Container(
-                                width: 250,
+                                width: 270,
                                 height: 20,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Text(canViewQList[index][3], style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600
-                                    ),),
+                                    Text(
+                                      canViewQList[index][3],
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
                               Container(
+                                margin: EdgeInsets.fromLTRB(15, 0, 0, 0),
                                 height: 20,
-                                child: RichText(
-                                  text: TextSpan(
-                                    text: majorList,
+                                width: 300,
+                                child: Expanded(
+                                  child: Text(
+                                    canViewQList[index][5],
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 15, // 더 큰 폰트 크기로 변경해보세요.
                                     ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
                                 ),
+
                               ),
-                                  ],
-                                ),
                             ],
                           ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -170,8 +206,21 @@ class _QnAState extends State<QnA> {
             ),
           );
         },
+      )
+          : Center(
+        child: Text("QnA가 없습니다."),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // 버튼을 눌렀을 때 수행할 동작
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CreateQ()),
+          );
+        },
+        child: Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
-
 }
