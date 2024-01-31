@@ -61,7 +61,7 @@ class _SettingState extends State<Setting> {
           BaseUserData.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
       logger.d("statusCode : ${result.data}");
       if (result.code == 200) {
-        getMyProfile(result.data);
+        getMyProfile(result.data as int);
       }
     } else {
       logger.e('세션이 만료되었습니다.');
