@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:bigsogo/main_service/data/BaseData.dart';
 import 'package:bigsogo/main_service/bottom_service/UserDataModel.dart';
 import 'package:bigsogo/main_service/bottom_service/UserProfile.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 import '../../log_in/login_activity.dart';
+import '../data/BaseData.dart';
 
 class Setting extends StatefulWidget {
   @override
@@ -31,11 +31,10 @@ class _SettingState extends State<Setting> {
   String info = "안녕하세요 안드로이드 개발을 잘 하는 부산 이성은입니다.";
 
   Future<BaseData<UserProfile>> getMyProfile(int userId) async {
-    logger.d("message");
-    final response =
-        await http.get(Uri.parse("http://10.1.8.72:8080/profile/{$userId}"));
-    var result = BaseData<UserProfile>.fromJson(
-        jsonDecode(utf8.decode(response.bodyBytes)));
+    final response = await http.get(Uri.parse("http://152.67.214.13:8080/profile/${userId}"), headers: {'Content-Type': 'application/json'});
+    logger.d("aaaa${response}");
+    var result = BaseData<UserProfile>.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+    logger.d("${response.statusCode}");
     if (response.statusCode == 200) {
       logger.d(result.data);
       return result;
@@ -52,16 +51,14 @@ class _SettingState extends State<Setting> {
 
     // user의 정보가 있다면 로그인 후 들어가는 첫 페이지로 넘어가게 합니다.
     if (userInfo != null) {
-      logger.d("statusCode : ${userInfo}");
       final response = await http.get(
           Uri.parse("http://152.67.214.13:8080/user"),
           headers: {HttpHeaders.authorizationHeader: userInfo});
 
-      var result =
-          BaseUserData.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
-      logger.d("statusCode : ${result.data}");
+      var result = BaseUserData.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+      logger.d("statusCode : ${result.data.id}");
       if (result.code == 200) {
-        getMyProfile(result.data as int);
+        getMyProfile(result.data.id);
       }
     } else {
       logger.e('세션이 만료되었습니다.');
@@ -75,7 +72,6 @@ class _SettingState extends State<Setting> {
   @override
   void initState() {
     super.initState();
-    // myInfo =  getMyProfile();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _asyncMethod();
@@ -86,53 +82,72 @@ class _SettingState extends State<Setting> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
-        body: ListView.builder(
+        body: ListView.separated(
             itemCount: testContentsInfo.length + 1,
             itemBuilder: (BuildContext ctx, int idx) {
               if (idx == 0) {
                 return Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                          color: Color(0xFFF5FBFF),
+                          color: Color(0xFFFFFFFF),
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(26, 26, 26, 26),
+                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Image.network(
-                                      'https://static.wikia.nocookie.net/p__/images/8/8a/Shiro_.png/revision/latest?cb=20210703182454&path-prefix=protagonist',
-                                      width: 70,
-                                      height: 70,
-                                      fit: BoxFit.cover,
-                                    ),
-                                    const SizedBox(
-                                      width: 13,
-                                    ),
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                    const SizedBox(height: 10,),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        Text(name,
-                                            textAlign: TextAlign.start,
-                                            style: const TextStyle(
-                                                fontSize: 24,
-                                                fontFamily: "Pretendard",
-                                                fontWeight: FontWeight.w500)),
-                                        Image.network(
-                                          'https://api.surfit.io/v1/category/content-cover/develop/git/2x',
-                                          width: 38,
-                                          height: 38,
-                                          fit: BoxFit.cover,
-                                        ),
+                                        IconButton(onPressed: (){}, icon: Icon(Icons.more_vert_sharp))
                                       ],
                                     ),
+                                    SizedBox(height: 28,),
+                                    Image.network(
+                                      'https://static.wikia.nocookie.net/p__/images/8/8a/Shiro_.png/revision/latest?cb=20210703182454&path-prefix=protagonist',
+                                      width: 120,
+                                      height: 120,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    Text(
+                                      "이성은",
+                                        style: const TextStyle(
+                                            fontSize: 24,
+                                            fontFamily: "Pretendard",
+                                            fontWeight: FontWeight.bold,
+                                            )
+                                    ),
+                                    SizedBox(height: 50,),
+                                    Container(
+                                        width: double.infinity,
+                                        child: ElevatedButton(
+                                          onPressed: () {},
+                                          style: ButtonStyle(
+                                            shape: MaterialStateProperty.all<
+                                                RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(
+                                                      10.0), // 각지게 만들기 위한 값
+                                                )),
+                                            backgroundColor:
+                                            MaterialStateProperty.all<Color>(
+                                                Color(0xFF4B66DC)),
+                                            fixedSize: MaterialStateProperty
+                                                .all<Size>(Size.fromHeight(
+                                                40)), // 높이는 고정, 가로는 디바이스에 맞추어 유동적으로
+                                          ),
+                                          child: const Text("내 QnA 보기",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontFamily: "Pretendard",
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Color(0xFFFFFFFF))),
+                                        ))
                                   ],
                                 ),
                                 Row(
@@ -165,35 +180,9 @@ class _SettingState extends State<Setting> {
                                 SizedBox(
                                   height: 13,
                                 ),
-                                Container(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: () {},
-                                      style: ButtonStyle(
-                                        shape: MaterialStateProperty.all<
-                                                RoundedRectangleBorder>(
-                                            RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              15.0), // 각지게 만들기 위한 값
-                                        )),
-                                        backgroundColor:
-                                            MaterialStateProperty.all<Color>(
-                                                Color(0xFF4B66DC)),
-                                        fixedSize: MaterialStateProperty
-                                            .all<Size>(Size.fromHeight(
-                                                50)), // 높이는 고정, 가로는 디바이스에 맞추어 유동적으로
-                                      ),
-                                      child: const Text("내 QnA 보기",
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              fontFamily: "Pretendard",
-                                              fontWeight: FontWeight.normal,
-                                              color: Color(0xFFFFFFFF))),
-                                    ))
                               ],
                             ),
-                          ))
+                          )),
                     ]);
               } else {
                 return Column(
@@ -208,9 +197,9 @@ class _SettingState extends State<Setting> {
                     //   child:
                       Container(
                       width: double.infinity,
-                      color: Color(0xFFF5FBFF),
+                      color: Color(0xFFFFFFFF),
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(26, 26, 0, 0),
+                        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,23 +211,20 @@ class _SettingState extends State<Setting> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold
                                 )),
-                            Container(
-                              padding: EdgeInsets.only(right: 28),
-                              child: Text(
-                                "${testContentsInfo[idx - 1]}",
-                                style: const TextStyle(
-                                    fontFamily: "Pretendard",
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal,
-                                  color: Color(0xFF818181)
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              softWrap: true,
-                                maxLines: 3,
+                            Text(
+                              "${testContentsInfo[idx - 1]}",
+                              style: const TextStyle(
+                                  fontFamily: "Pretendard",
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.normal,
+                                color: Color(0xFF818181)
                               ),
+                              overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                              maxLines: 3,
                             ),
                             SizedBox(
-                              height: 26,
+                              height: 5,
                             )
                           ],
                         ),
@@ -250,7 +236,9 @@ class _SettingState extends State<Setting> {
                   ],
                 );
               }
-            }));
+            }, separatorBuilder: (BuildContext context, int index) {
+              return Divider();
+              },));
   }
 }
-//what is that
+// 아오 짜증나네
