@@ -38,6 +38,7 @@ class _QnAState extends State<QnA> {
           majorList = ""; // 기존 데이터를 지우고 다시 초기화
 
           for (int i = 0; i < dataList.length; i++) {
+            majorList = ""; // 기존 데이터를 지우고 다시 초기화
             List<String> row = [];
             row.add(dataList[i].id.toString());
             row.add(dataList[i].title);
@@ -94,7 +95,7 @@ class _QnAState extends State<QnA> {
               );
             },
             child: Container(
-              height: 200,
+              height: 240,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -114,11 +115,15 @@ class _QnAState extends State<QnA> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Text(
-                            " Q. " + canViewQList[index][1],
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 22,
+                          Expanded(
+                            child: Text(
+                              " Q. " + canViewQList[index][1],
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 22,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -178,16 +183,17 @@ class _QnAState extends State<QnA> {
                                 margin: EdgeInsets.fromLTRB(15, 0, 0, 0),
                                 height: 20,
                                 width: 300,
-                                child: RichText(
-                                  text: TextSpan(
-                                    text: canViewQList[index][5],
+                                child: Expanded(
+                                  child: Text(
+                                    canViewQList[index][5],
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 15, // 더 큰 폰트 크기로 변경해보세요.
                                     ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
                                 ),
+
                               ),
                             ],
                           ),
