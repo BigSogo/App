@@ -1,3 +1,4 @@
+import 'package:bigsogo/main_service/bottom_service/question/QuestionAnswer.dart';
 import 'package:bigsogo/main_service/data/UserData.dart';
 import 'package:bigsogo/main_service/data/search_result.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import '../other_service/notification_activity.dart';
 
 List<String> ProFileData = [];
 List<String> QnAData = [];
+List<int> QnAdataId = [];
 List<List<String>> canUserData = [];
 String majorList = "";
 
@@ -43,15 +45,19 @@ class _BarControlState extends State<BarControl> {
         await Future.delayed(Duration(seconds: 0)); // 비동기 동작 완료를 기다림
         // result 객체를 사용하여 필요한 작업 수행
         QnAData.clear(); // 데이터를 중복해서 추가하지 않도록 리스트를 비워줍니다.
+        QnAdataId.clear();
         print("result : ${result.data}");
 
         setState(() {
           for (int i = 0; i < result.data.length; i++) {
             QnAData.add(result.data[i].title);
+            QnAdataId.add(result.data[i].id);
           }
         });
 
-        print("QnAData : $QnAData"); // QnAData == []
+        print("QnAData : $QnAData");
+        print("QnADataId : $QnAdataId");
+
 
 
         return result;
@@ -353,6 +359,14 @@ class _BarControlState extends State<BarControl> {
                               return GestureDetector(
                                 onTap: () {
                                   print(index);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => QAnswer(
+                                        canViewQList[QnAdataId[index]-1],
+                                      ),
+                                    ),
+                                  );
                                 },
                                 child: Container(
                                   height: 70,

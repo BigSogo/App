@@ -458,7 +458,7 @@ class _QAnswerState extends State<QAnswer>{
                         },
                         controller: commentController,
                         decoration: InputDecoration(
-                          hintText: "대충 저거쓰세여",
+                          hintText: "댓글을 입력하세요.",
                           border: InputBorder.none,
                         ),
                       ),
