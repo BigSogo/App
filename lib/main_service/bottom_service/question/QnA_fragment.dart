@@ -1,13 +1,20 @@
+import 'dart:io';
+
+import 'package:bigsogo/log_in/login_activity.dart';
 import 'package:bigsogo/main_service/bottom_service/question/QuestionAnswer.dart';
 import 'package:bigsogo/main_service/other_service/create_question.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:bigsogo/main_service/data/publickQ_data.dart';
 
+import '../UserDataModel.dart';
+
 List<List<String>> canViewQList = [];
 String majorList = "";
+String thisUserName = "히히 테스트용으로 막만든 유저 이름이지";
 
 class QnA extends StatefulWidget {
   @override
@@ -19,9 +26,14 @@ class _QnAState extends State<QnA> {
   void initState() {
     super.initState();
     fetchData(); // initState에서 fetchData 호출
+    asyncMethod();
   }
 
   var isQnaHaving = true;
+  TextEditingController _titleEditingController = TextEditingController();
+  TextEditingController _contentTextEditingController = TextEditingController();
+
+
 
   Future<List<Data>> fetchData() async {
     try {
@@ -31,6 +43,8 @@ class _QnAState extends State<QnA> {
       if (response.statusCode == 200) {
         final MyModel myModel =
         MyModel.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+
+        print("thisUsername : $thisUserName");
 
         List<Data> dataList = myModel.data;
         setState(() {
@@ -74,6 +88,253 @@ class _QnAState extends State<QnA> {
       throw e;
     }
   }
+
+  //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
+  //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
+
+  static final storage = FlutterSecureStorage(); // FlutterSecureStorage를 storage로 저장
+  dynamic userInfo = ''; // storage에 있는 유저 정보를 저장
+
+  asyncMethod() async { // 이거 함수임
+    // read 함수로 key값에 맞는 정보를 불러오고 데이터타입은 String 타입
+    // 데이터가 없을때는 null을 반환
+    userInfo = await storage.read(key:'login');
+    print("userInfo : ${userInfo}");
+
+    // user의 정보가 있다면 서버에 토큰넣어서 요청 보냄
+    if (userInfo != null) {
+      print("userInfo: $userInfo");
+
+      try {
+        final response = await http.get(
+          Uri.parse("http://152.67.214.13:8080/user"),
+          headers: {HttpHeaders.authorizationHeader: userInfo},
+        );
+
+        print("Server Response: ${response.statusCode}");
+        print("Server Body: ${response.body}");
+
+        var result = BaseUserData.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+
+
+        print("statusCode2 : ${result.data}");
+        print("thisUserName : $thisUserName");
+
+        if (result.code == 200) {
+          thisUserName = result.data.username;
+          setState(() {
+
+          });
+        } else {
+          print("서버 코드가 200이 아님;; ${result.code}");
+        }
+      } catch (e) {
+        print("Error during http.get: $e");
+      }
+    }
+  }
+
+  //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
+  //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
+
+  Future<void> deleteComment(int questId) async {
+    final String url = 'http://152.67.214.13:8080/question/$questId'; // 서버의 Comment API URL로 변경하세요.
+
+    print("deleteQuestion 실행 확인");
+
+    final client = http.Client();
+    try {
+      final response = await client.delete(
+        Uri.parse(url),
+        headers: {
+          HttpHeaders.authorizationHeader: userInfo,
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+      );
+
+      print("response 요청 확인");
+
+      if (response.statusCode == 200) {
+        print('질문이 삭제되었습니다.');
+        await fetchData();
+        // 화면 갱신
+        setState(() {});
+      } else {
+        print('질문 삭제 실패. Status code: ${response.statusCode}' + response.body);
+      }
+    } finally {
+      client.close();
+    }
+  }
+
+  void _showDeleteCheckDialog(int questId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('확인'),
+          content: Text('정말로 질문을 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // 팝업 닫기
+              },
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                // 동작 수행
+                deleteComment(questId);
+                // 팝업 닫기
+                Navigator.pop(context);
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //====//====//====//====//====//====//====//====//====//====//====//====//====//====//====
+
+
+  Future<void> updateComment(int commentId, String updatedContent) async {
+    final String url = 'http://152.67.214.13:8080/comment'; // 실제 서버 URL로 변경하세요.
+
+    // 준비된 데이터
+    Map<String, dynamic> data = {
+      'comment_id': commentId,
+      'content': updatedContent,
+    };
+
+    // 데이터를 JSON 형태로 변환
+    String jsonData = jsonEncode(data);
+
+    try {
+      final response = await http.put(
+          Uri.parse(url),
+          body: jsonData,
+          headers: {
+            HttpHeaders.authorizationHeader: userInfo,
+            HttpHeaders.contentTypeHeader: 'application/json',
+          }
+      );
+
+      if (response.statusCode == 200) {
+        print('댓글이 성공적으로 업데이트되었습니다.');
+
+        await fetchData();
+        // 화면 갱신
+        setState(() {});
+
+      } else {
+        print('댓글 업데이트 실패. Status code: ${response.statusCode}' + response.body);
+      }
+    } catch (e) {
+      print('오류 발생: $e');
+    }
+  }
+
+  Future<void> showEditablePopup(BuildContext context, int index) async {
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('댓글 수정'),
+          content: Column(
+            children: [
+              TextField(
+                controller: _titleEditingController,
+                decoration: InputDecoration(
+                  hintText: '댓글을 수정해주세요.',
+                ),
+              ),
+              TextField(
+                controller: _contentTextEditingController,
+                decoration: InputDecoration(
+                  hintText: '추가 텍스트 필드',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 닫기 버튼
+              },
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                String editedText = _titleEditingController.text;
+                String secondText = _contentTextEditingController.text;
+                // 수정된 내용 사용
+                print('Edited Text: $editedText');
+                print('Second Text: $secondText');
+                Navigator.of(context).pop(); // 닫기 버튼
+
+                updateComment(int.parse(commentList[index][0]), editedText);
+              },
+              child: Text('저장하기'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> editPopupSetting(String content, int index) async {
+    _titleEditingController.text = content;
+    _contentTextEditingController.text = ''; // 추가 텍스트 필드 초기화
+
+    showEditablePopup(context, index);
+  }
+
+
+//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
+//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
+
+  void _showMoreOptions(BuildContext context, int questId, int index) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          // 더보기 창의 UI 구성을 넣으세요.
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.edit),
+                title: Text('수정하기'),
+                onTap: () {
+                  // 수정하기 로직을 추가하세요.
+                  Navigator.pop(context);
+
+
+
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete),
+                title: Text('삭제하기'),
+                onTap: () {
+                  // 삭제하기 로직을 추가하세요.
+                  Navigator.pop(context);
+
+                  _showDeleteCheckDialog(int.parse(canViewQList[index][0]));
+
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
 
   @override
   Widget build(BuildContext context) {
@@ -165,16 +426,28 @@ class _QnAState extends State<QnA> {
                             children: [
                               Container(
                                 width: 270,
-                                height: 20,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      canViewQList[index][3],
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          canViewQList[index][3],
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+
+                                        canViewQList[index][3] == thisUserName
+                                        ? Padding(
+                                          padding: const EdgeInsets.only(left: 100),
+                                          child: IconButton(onPressed: (){
+                                            _showMoreOptions(context, int.parse(canViewQList[index][0]), index);
+
+                                          }, icon: Icon(Icons.more_vert)),
+                                        ) : Text("")
+                                      ],
                                     ),
                                   ],
                                 ),
