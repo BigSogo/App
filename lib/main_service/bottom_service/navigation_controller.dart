@@ -417,11 +417,11 @@ class _BarControlState extends State<BarControl> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.question_answer),
+            icon: Icon(Icons.home),
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.question_answer),
             label: "",
           ),
           BottomNavigationBarItem(
@@ -450,8 +450,8 @@ class _BarControlState extends State<BarControl> {
 
 
   final List<Widget> _widgetOptions = <Widget>[
-    QnA(),
     Home(),
+    QnA(),
     Setting(),
   ];
 

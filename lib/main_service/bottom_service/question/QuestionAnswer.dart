@@ -10,6 +10,7 @@ import '../../data/question_1.dart';
 import '../UserDataModel.dart';
 
 var iconColor = Color(0xFFA8A8A8);
+String thisUserName = "";
 List<List<String>> commentList = [];
 
 //=============//=============//=============//=============//=============
@@ -56,7 +57,7 @@ class _QAnswerState extends State<QAnswer>{
 
     CommentRequest requestBody = CommentRequest(content, qId);
 
-    print("content : $content , question_id : $qId");
+    print("content : $content , question_id : $qId , userInfo : $userInfo");
 
     final client = http.Client();
     try {
@@ -91,23 +92,37 @@ class _QAnswerState extends State<QAnswer>{
     // read 함수로 key값에 맞는 정보를 불러오고 데이터타입은 String 타입
     // 데이터가 없을때는 null을 반환
     userInfo = await storage.read(key:'login');
+    print("userInfo : ${userInfo}");
 
     // user의 정보가 있다면 서버에 토큰넣어서 요청 보냄
-    if (userInfo != null) { // null체크 토큰이 없을 때 구별
-      print("statusCode : ${userInfo}");
-      final response = await http.get(Uri.parse("http://10.1.8.72:8080/user"), headers: {HttpHeaders.authorizationHeader:userInfo});
+    if (userInfo != null) {
+      print("userInfo: $userInfo");
 
-      var result = BaseUserData.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
-      // 서버코드가 200으로 왔을 때 성ㄱ공
-      print("statusCode : ${result.data}");
-      if (result.code == 200){
-        // 여기서 서버에서 받은 데이터로 잘 하시면 됨니다.
-      }
-      else {
-        // 서버 코드가 200이 아닐때 즉 값이 이상할 때
-        print("그냥 음 아잇 서버코드가 200이 아님;; ${result.code}");
+      try {
+        final response = await http.get(
+          Uri.parse("http://152.67.214.13:8080/user"),
+          headers: {HttpHeaders.authorizationHeader: userInfo},
+        );
+
+        print("Server Response: ${response.statusCode}");
+        print("Server Body: ${response.body}");
+
+        var result = BaseUserData.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+
+        print("statusCode2 : ${result.data}");
+        print("thisUserName : $thisUserName");
+
+        if (result.code == 200) {
+          thisUserName = result.data.username;
+        } else {
+          print("서버 코드가 200이 아님;; ${result.code}");
+        }
+      } catch (e) {
+        print("Error during http.get: $e");
       }
     }
+
+
   }
 
   //===============//===============//===============//===============//===============//===============//===============//===============
@@ -397,28 +412,37 @@ class _QAnswerState extends State<QAnswer>{
                                       crossAxisAlignment: CrossAxisAlignment.start, // 수직 방향으로 시작점에 맞추도록 설정
         
                                       children: [
-                                        Text(commentList[index][2],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 15
-                                        ),),
                                         Row(
                                           children: [
-                                            Text(commentList[index][3],
+                                            Text(
+                                              commentList[index][2],
+                                              maxLines: 1, // 최대 표시할 줄 수
+                                              overflow: TextOverflow.ellipsis, // 넘칠 경우 "..."으로 표시
                                               style: TextStyle(
-                                                  fontSize: 12
-                                              ),),
-        
-                                            Padding(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+
+                                            commentList[index][2] == thisUserName
+                                             ? Padding(
                                               padding: const EdgeInsets.only(left: 100),
                                               child: IconButton(onPressed: (){
-                                                  _showMoreOptions(context, int.parse(commentList[index][0]));
+                                                _showMoreOptions(context, int.parse(commentList[index][0]));
 
-                                                  }, icon: Icon(Icons.more_vert)),
-                                            ),
-        
+                                              }, icon: Icon(Icons.more_vert)),
+                                            ) : Text("")
                                           ],
                                         ),
+
+                                        Text(commentList[index][3],
+                                          style: TextStyle(
+                                              fontSize: 12
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+
                                       ],
                                     ),
                                   )
