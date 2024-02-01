@@ -243,32 +243,36 @@ class _QnAState extends State<QnA> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('질문 수정'),
-          content: Column(
+           content: Column(
             children: [
               TextField(
                 controller: _titleEditingController,
                 keyboardType: TextInputType.multiline,
                 maxLines: null, // 무제한으로 설정하여 자동으로 높이 조절
+                textAlignVertical: TextAlignVertical.top, // 텍스트 필드의 텍스트를 위로 정렬
+                textAlign: TextAlign.start, // 왼쪽 정렬 설정
                 decoration: InputDecoration(
                   hintText: '제목을 수정해주세요.',
-                  labelText: '제목', //
+                  labelText: '제목',
                   labelStyle: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600
-                  )// 트 // 힌트 대신 라벨 사용
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               TextField(
                 controller: _contentTextEditingController,
                 keyboardType: TextInputType.multiline,
                 maxLines: null, // 무제한으로 설정하여 자동으로 높이 조절
+                textAlignVertical: TextAlignVertical.top, // 텍스트 필드의 텍스트를 위로 정렬
+                textAlign: TextAlign.start, // 왼쪽 정렬 설정
                 decoration: InputDecoration(
                   hintText: '내용을 수정해주세요.',
-                  labelText: '내용', // 힌
+                  labelText: '내용',
                   labelStyle: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600
-                  )// 트 대신 라벨 사용
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -298,6 +302,7 @@ class _QnAState extends State<QnA> {
       },
     );
   }
+
 
 
   Future<void> editPopupSetting(String title, String content, int index) async {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bigsogo/main_service/bottom_service/question/QnA_fragment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -112,6 +113,13 @@ class _QAnswerState extends State<QAnswer>{
         await takeComment(int.parse(widget.clickQList[0]));
         // 화면 갱신
         setState(() {});
+
+        Fluttertoast.showToast(
+          msg: "삭제되었습니다.",
+          gravity: ToastGravity.BOTTOM,
+          fontSize: 20,
+          toastLength: Toast.LENGTH_SHORT,
+        );
       } else {
         print('댓글 삭제 실패. Status code: ${response.statusCode}' + response.body);
       }
@@ -123,6 +131,7 @@ class _QAnswerState extends State<QAnswer>{
 
   Future<void> updateComment(int commentId, String updatedContent) async {
     final String url = 'http://152.67.214.13:8080/comment'; // 실제 서버 URL로 변경하세요.
+    print("updateComment 실행확인");
 
     // 준비된 데이터
     Map<String, dynamic> data = {
@@ -133,22 +142,37 @@ class _QAnswerState extends State<QAnswer>{
     // 데이터를 JSON 형태로 변환
     String jsonData = jsonEncode(data);
 
+    print("updateComment 실행확인_1");
+
     try {
       final response = await http.put(
         Uri.parse(url),
         body: jsonData,
         headers: {
+          'accept': 'application/json', // 이 부분을 추가
           HttpHeaders.authorizationHeader: userInfo,
           HttpHeaders.contentTypeHeader: 'application/json',
         }
       );
+
+      print("updateComment 실행확인_2");
+
 
       if (response.statusCode == 200) {
         print('댓글이 성공적으로 업데이트되었습니다.');
 
         await takeComment(int.parse(widget.clickQList[0]));
         // 화면 갱신
-        setState(() {});
+        Fluttertoast.showToast(
+          msg: "변경되었습니다.",
+          gravity: ToastGravity.BOTTOM,
+          fontSize: 20,
+          toastLength: Toast.LENGTH_SHORT,
+        );
+
+        setState(() {
+
+        });
 
       } else {
         print('댓글 업데이트 실패. Status code: ${response.statusCode}' + response.body);
@@ -332,6 +356,11 @@ class _QAnswerState extends State<QAnswer>{
             maxLines: null, // 무제한으로 설정하여 자동으로 높이 조절
             decoration: InputDecoration(
               hintText: '댓글을 수정해주세요.',
+              labelText: '내용', // 힌
+              labelStyle: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600
+              )//
             ),
           ),
           actions: [
@@ -346,9 +375,10 @@ class _QAnswerState extends State<QAnswer>{
                 String editedText = _textEditingController.text;
                 // 수정된 내용 사용
                 print('Edited Text: $editedText');
+                updateComment(int.parse(commentList[index][0]), editedText);
+
                 Navigator.of(context).pop(); // 닫기 버튼
 
-                updateComment(int.parse(commentList[index][0]), editedText);
               },
               child: Text('저장하기'),
             ),
