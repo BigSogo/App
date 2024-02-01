@@ -1,9 +1,10 @@
-import 'package:bigsogo/main_service/other_service/UserData.dart';
-import 'package:bigsogo/main_service/other_service/search_result.dart';
+import 'package:bigsogo/main_service/bottom_service/question/QuestionAnswer.dart';
+import 'package:bigsogo/main_service/data/UserData.dart';
+import 'package:bigsogo/main_service/data/search_result.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bigsogo/main_service/bottom_service/home_fragment.dart';
-import 'package:bigsogo/main_service/bottom_service/QnA_fragment.dart';
+import 'package:bigsogo/main_service/bottom_service/question/QnA_fragment.dart';
 import 'package:bigsogo/main_service/bottom_service/setting_fragment.dart';
 
 import 'package:http/http.dart' as http;
@@ -13,6 +14,7 @@ import '../other_service/notification_activity.dart';
 
 List<String> ProFileData = [];
 List<String> QnAData = [];
+List<int> QnAdataId = [];
 List<List<String>> canUserData = [];
 String majorList = "";
 
@@ -20,6 +22,7 @@ String majorList = "";
 class BarControl extends StatefulWidget {
   @override
   State<BarControl> createState() => _BarControlState();
+
 }
 
 
@@ -32,7 +35,7 @@ class _BarControlState extends State<BarControl> {
     print("Future<SearchResult> 작동죔, keyWord: $keyword");
     try {
       final response = await http.get(
-        Uri.parse('http://10.1.8.72:8080/question/search?keyword=${keyword}')
+        Uri.parse('http://152.67.214.13:8080/question/search?keyword=${keyword}')
       );
 
       if (response.statusCode == 200) {
@@ -41,16 +44,20 @@ class _BarControlState extends State<BarControl> {
 
         await Future.delayed(Duration(seconds: 0)); // 비동기 동작 완료를 기다림
         // result 객체를 사용하여 필요한 작업 수행
-          QnAData.clear(); // 데이터를 중복해서 추가하지 않도록 리스트를 비워줍니다.
+        QnAData.clear(); // 데이터를 중복해서 추가하지 않도록 리스트를 비워줍니다.
+        QnAdataId.clear();
         print("result : ${result.data}");
 
         setState(() {
           for (int i = 0; i < result.data.length; i++) {
             QnAData.add(result.data[i].title);
+            QnAdataId.add(result.data[i].id);
           }
         });
 
-        print("QnAData : $QnAData"); // QnAData == []
+        print("QnAData : $QnAData");
+        print("QnADataId : $QnAdataId");
+
 
 
         return result;
@@ -72,7 +79,7 @@ class _BarControlState extends State<BarControl> {
       print("터진곳 확인용 로그");
 
       final response = await http.get(
-        Uri.parse('http://10.1.8.72:8080/user/search?query=$keyword'),
+        Uri.parse('http://152.67.214.13:8080/user/search?query=$keyword'),
       headers: {'accept': 'application/json'});
 
       if (response.statusCode == 200) {
@@ -82,15 +89,14 @@ class _BarControlState extends State<BarControl> {
 
         await Future.delayed(Duration(seconds: 0)); // 비동기 동작 완료를 기다림
         // result 객체를 사용하여 필요한 작업 수행
-        QnAData.clear(); // 데이터를 중복해서 추가하지 않도록 리스트를 비워줍니다.
         print("터진곳 확인용 로그3");
 
         final List<dynamic> dataList = decodedData['data'] as List<dynamic>;
         final List<UserData> userList = dataList.map((item) => UserData.fromJson(item)).toList();
         print("터진곳 확인용 로그4");
+        canUserData.clear();
 
         setState(() {
-          canUserData.clear();
           for (int i = 0; i < userList.length; i++) {
             // 리스트의 길이를 확인하고 필요할 경우 초기화합니다.
 
@@ -109,12 +115,14 @@ class _BarControlState extends State<BarControl> {
             for (int j = 0; j < userList[i].major.length; j++) {
               majorList += " #" + userList[i].major[j];
             }
+
           }
         });
         print("터진곳 확인용 로그5");
-
-
         print("userList : $userList");
+
+
+        print("canUserData : $canUserData");
 
         return userList;
 
@@ -136,7 +144,7 @@ class _BarControlState extends State<BarControl> {
   late FocusNode searchFocusNode;
   final _contentEditController = TextEditingController();
 
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
 
   //===============//===============//===============//===============//===============
   //===============//===============//===============//===============//===============
@@ -145,6 +153,24 @@ class _BarControlState extends State<BarControl> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            if (isSearchVisible) {
+              setState(() {
+                searchFocusNode.requestFocus();
+                isSearchVisible = false;
+                isSearchClicked = false;
+                _contentEditController.text = "";
+
+              });
+            }
+            else {
+              Navigator.pop(context);
+            }
+          },
+        ),
         title: isSearchVisible
             ? TextField(
           onEditingComplete: () {
@@ -156,7 +182,13 @@ class _BarControlState extends State<BarControl> {
               });
             }
             else {
-              isSearchClicked = false;
+              setState(() {
+                isSearchClicked = false;
+              });
+            }
+
+            if (isSearchVisible) {
+              searchFocusNode.requestFocus();
             }
 
           },
@@ -167,8 +199,7 @@ class _BarControlState extends State<BarControl> {
             hintText: "검색어를 입력하세요",
             border: InputBorder.none,
           ),
-        )
-            : Text(""),
+        ) : Text(""),
         actions: [
           GestureDetector(
             onTap: () {
@@ -181,7 +212,10 @@ class _BarControlState extends State<BarControl> {
 
 
                 } else {
-                  isSearchVisible = !isSearchClicked;
+                  setState(() {
+                    isSearchVisible = !isSearchVisible;
+                    isSearchClicked = false;
+                  });
                 }
 
                 if (isSearchVisible) {
@@ -219,8 +253,7 @@ class _BarControlState extends State<BarControl> {
             SafeArea(
               child: _widgetOptions.elementAt(_selectedIndex),
             ),
-            if (isSearchClicked)
-              Positioned.fill(
+            isSearchClicked ? Positioned.fill(
                 child: Column(
                   children: [
                     Container(
@@ -300,7 +333,7 @@ class _BarControlState extends State<BarControl> {
                             width: double.infinity,
                             height: double.infinity,
                             color: Colors.white,
-                            child: Text('사용자 검색 결과가 없습니다.'),
+                            child: Center(child: Text('사용자 검색 결과가 없습니다.')),
                           ),
                         ),
                       ),
@@ -328,6 +361,14 @@ class _BarControlState extends State<BarControl> {
                               return GestureDetector(
                                 onTap: () {
                                   print(index);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => QAnswer(
+                                        canViewQList[QnAdataId[index]-1],
+                                      ),
+                                    ),
+                                  );
                                 },
                                 child: Container(
                                   height: 70,
@@ -343,7 +384,10 @@ class _BarControlState extends State<BarControl> {
                                     ],
                                   ),
                                   child: Center(
-                                    child: Text(QnAData[index]),
+                                    child: Text(" Q. " + QnAData[index], style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15
+                                    ),),
                                   ),
                                 ),
                               );
@@ -354,14 +398,14 @@ class _BarControlState extends State<BarControl> {
                               width: double.infinity,
                               height: double.infinity,
                               color: Colors.white,
-                              child: Text('QnA 검색결과가 없습니다.'),
+                              child: Center(child: Text('QnA 검색결과가 없습니다.')),
                             ),
                           ),
                         ),
                       )
                   ],
                 ),
-              ),
+              ) : SizedBox.shrink(),
             ],
           ),
         ],
@@ -370,7 +414,7 @@ class _BarControlState extends State<BarControl> {
 
 
 
-        bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.question_answer),

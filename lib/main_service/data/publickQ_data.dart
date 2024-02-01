@@ -22,16 +22,16 @@ class Writer {
   factory Writer.fromJson(Map<String, dynamic> json) {
     return Writer(
       id: json['id'],
-      profileImg: json['profile_img'] ?? '값이 없음',
-      email: json['email'] ?? '비어있을 리, 없음',
-      username: json['username'] ?? 'ㅇㅇ',
+      profileImg: json['profile_img'] ?? 'https://static-cdn.jtvnw.net/jtv_user_pictures/ecd6ee59-9f18-4eec-b8f3-63cd2a9127a5-profile_image-300x300.png',
+      email: json['email'] ?? '값이 없습니다.',
+      username: json['username'] ?? '익명',
       description: json['description'] ?? '우주 최강 귀요미 ><',
       major: List<String>.from(json['major'] ?? []),
       profile: Profile.fromJson(json['profile'] ?? {
         'id': 0,
         'subject': '주제 없음',
         'content': '내용 없음',
-        'portfolio_url': 'https://media.tenor.com/ljCF9v1NxKsAAAAe/%EC%95%84%EC%9D%B4%EB%84%A4-ine.png',
+        'portfolio_url': 'https://static-cdn.jtvnw.net/jtv_user_pictures/ecd6ee59-9f18-4eec-b8f3-63cd2a9127a5-profile_image-300x300.png',
       }),
     );
   }
@@ -83,7 +83,7 @@ class Senior {
     return Senior(
       id: json['id'] ?? 0,
       profileImg: json['profile_img'] ?? '값이 없음',
-      email: json['email'] ?? '비어있을 리, 없음',
+      email: json['email'] ?? '값이 없습니다.',
       username: json['username'] ?? 'ㅇㅇ',
       description: json['description'] ?? '우주 최강 귀요미 ><',
       major: List<String>.from(json['major'] ?? []),

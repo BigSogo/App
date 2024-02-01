@@ -1,17 +1,14 @@
 import 'dart:convert';
 
 import 'package:bigsogo/main_service/other_service/random_data.dart';
-import 'package:bigsogo/main_service/other_service/search_result.dart';
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:bigsogo/main_service/other_service/notification_activity.dart';
 import 'package:logger/logger.dart';
 
-import '../other_service/publickQ_data.dart';
-import 'QnA_fragment.dart';
+import '../data/publickQ_data.dart';
 
 
 class Home extends StatefulWidget {
@@ -19,7 +16,7 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-List<List<String>> canViewQList = [];
+List<List<String>> canViewQListHome = [];
 List<List<String>> canViewList = [];
 String majorList = "";
 
@@ -55,7 +52,7 @@ class _HomeState extends State<Home> {
 
         List<Data> dataList = myModel.data;
         setState(() {
-          canViewQList.clear(); // 기존 데이터를 지우고 다시 초기화
+          canViewQListHome.clear(); // 기존 데이터를 지우고 다시 초기화
           majorList = ""; // 기존 데이터를 지우고 다시 초기화
 
           for (int i = 0; i < dataList.length; i++) {
@@ -66,7 +63,7 @@ class _HomeState extends State<Home> {
             row.add(dataList[i].writer.username);
             row.add(dataList[i].content);
 
-            canViewQList.add(row);
+            canViewQListHome.add(row);
 
             for (int j = 0; j < dataList[i].writer.major.length; j++) {
               majorList += " #" + (dataList[i].writer.major[j]);
@@ -74,9 +71,9 @@ class _HomeState extends State<Home> {
             row.add(majorList);
           }
           // logger.d("${canViewQList}");
-          print("canViewList : $canViewQList");
+          print("canViewList : $canViewQListHome");
 
-          if(canViewQList.isEmpty) {
+          if(canViewQListHome.isEmpty) {
             isQnaHaving = false;
           }
 
@@ -305,7 +302,7 @@ class _HomeState extends State<Home> {
 
         Container(
           alignment: Alignment.centerLeft,
-          child: Text( " Q. "+ canViewQList[0][1], style: TextStyle(
+          child: Text( " Q. "+ canViewQListHome[0][1], style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 20,
           ),),
@@ -319,7 +316,7 @@ class _HomeState extends State<Home> {
 
         Container(
           alignment: Alignment.centerLeft,
-          child: Text( " Q. "+ canViewQList[1][1], style: TextStyle(
+          child: Text( " Q. "+ canViewQListHome[1][1], style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 20,
           ),),
@@ -333,7 +330,7 @@ class _HomeState extends State<Home> {
 
         Container(
           alignment: Alignment.centerLeft,
-          child: Text( " Q. "+ canViewQList[2][1], style: TextStyle(
+          child: Text( " Q. "+ canViewQListHome[2][1], style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 20,
           ),),

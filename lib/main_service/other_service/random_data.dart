@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:bigsogo/main_service/other_service/publickQ_data.dart';
+import 'package:bigsogo/main_service/data/publickQ_data.dart';
 
 class UserData {
   final int id;

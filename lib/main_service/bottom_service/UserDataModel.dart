@@ -1,5 +1,5 @@
 
-class BaseUserData<UserDataModel>{
+class BaseUserData{
   final int code;
   final String message;
   final UserDataModel data;
@@ -14,17 +14,17 @@ class BaseUserData<UserDataModel>{
     return BaseUserData(
       code: json['code'],
       message: json['message'],
-      data: json['data'] ,
+      data: UserDataModel.fromJson(json['data']) ,
     );
   }
 }
 
 class UserDataModel {
   final int id;
-  final String profile_img;
+  final String? profile_img;
   final String email;
   final String username;
-  final String description;
+  final String? description;
   final List<String> major;
 
   const UserDataModel({
@@ -44,7 +44,6 @@ class UserDataModel {
       username: json['username'],
       description: json['description'],
       major: List<String>.from(json['major']),
-
     );
   }
 }
