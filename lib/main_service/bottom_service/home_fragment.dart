@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bigsogo/main_service/other_service/random_data.dart';
 import 'package:bigsogo/main_service/other_service/search_result.dart';
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:bigsogo/main_service/other_service/notification_activity.dart';
+import 'package:logger/logger.dart';
 
 import '../other_service/publickQ_data.dart';
 import 'QnA_fragment.dart';
@@ -18,12 +20,17 @@ class Home extends StatefulWidget {
 }
 
 List<List<String>> canViewQList = [];
+List<List<String>> canViewList = [];
 String majorList = "";
 
 class _HomeState extends State<Home> {
+  Logger logger = Logger();
+
+  @override
   void initState() {
     super.initState();
-    fetchData(); // initState에서 fetchData 호출
+    fetchData();
+    randomData();
   }
   int _current = 0;
   final CarouselController _controller = CarouselController();
@@ -33,13 +40,15 @@ class _HomeState extends State<Home> {
     "https://image.fmkorea.com/files/attach/new2/20210318/494354581/2042844561/3461045214/b3539dea40cfe92d0e8cfa926a1fcc4a.png"
   ];
 
+  var isQnaHaving = true;
+
   Future<List<Data>> fetchData() async {
     try {
       final response = await http.get(
         // Uri.parse('http://10.1.8.72:8080/question/list'),
         Uri.parse('http://152.67.214.13:8080/question/list'),
-
       );
+
       if (response.statusCode == 200) {
         final MyModel myModel =
         MyModel.fromJson(json.decode(utf8.decode(response.bodyBytes)));
@@ -62,8 +71,14 @@ class _HomeState extends State<Home> {
             for (int j = 0; j < dataList[i].writer.major.length; j++) {
               majorList += " #" + (dataList[i].writer.major[j]);
             }
+            row.add(majorList);
           }
+          // logger.d("${canViewQList}");
           print("canViewList : $canViewQList");
+
+          if(canViewQList.isEmpty) {
+            isQnaHaving = false;
+          }
 
         });
 
@@ -79,36 +94,83 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Widget sliderWidget() {
-    return CarouselSlider(
-      carouselController: _controller,
-      items: conferenceList.map(
-          (imgLink) {
-            return Builder(
-                builder: (context) {
-                  return SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: Image(
-                      fit: BoxFit.fill,
-                      image: NetworkImage(
-                        imgLink,
-                      ),
-                    ),
-                  );
-                }
-            );
+  Future<List<RandomData>> randomData() async {
+    try {
+      final response = await http.get(
+        Uri.parse("http://152.67.214.13:8080/user/random")
+      );
+      
+      if(response.statusCode == 200) {
+        final RandomModel randomModel =
+        RandomModel.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+        
+        List<RandomData> dataList = randomModel.data;
+        setState(() {
+          canViewList.clear();
+
+          
+          for(int i=0; i<dataList.length; i++){
+            List<String> row = [];
+            row.add(dataList[i].id.toString());
+            row.add(dataList[i].profileImg);
+            row.add(dataList[i].email);
+            row.add(dataList[i].username);
+            row.add(dataList[i].description);
+            print(canViewList);
+            majorList = "";
+            for(int j=0; j < dataList[i].major.length; j++) {
+              majorList += " #" + (dataList[i].major[j]);
+            }
+            row.add(majorList);
+
+            canViewList.add(row);
           }
-      ).toList(),
-      options: CarouselOptions(
-        height: 225,
-        viewportFraction: 1.0,
-        autoPlay: true,
-        autoPlayInterval: const Duration(seconds: 4),
-        onPageChanged: (index, reason) {
-          setState(() {
-            _current = index;
-          });
-        }
+        });
+        return dataList;
+      } else {
+        print("오류남 : ${response.statusCode}");
+        throw Exception("오류남 : ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error : ${e}");
+      throw e;
+    }
+  }
+
+
+  Widget sliderWidget() {
+    return SizedBox(
+      height: 225,
+      child: CarouselSlider(
+        carouselController: _controller,
+        items: conferenceList.map(
+            (imgLink) {
+              return Builder(
+                  builder: (context) {
+                    return SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: Image(
+                        fit: BoxFit.fill,
+                        image: NetworkImage(
+                          imgLink,
+                        ),
+                      ),
+                    );
+                  }
+              );
+            }
+        ).toList(),
+        options: CarouselOptions(
+          height: 225,
+          viewportFraction: 1.0,
+          autoPlay: true,
+          autoPlayInterval: const Duration(seconds: 4),
+          onPageChanged: (index, reason) {
+            setState(() {
+              _current = index;
+            });
+          }
+        ),
       ),
     );
   }
@@ -158,102 +220,133 @@ class _HomeState extends State<Home> {
             SizedBox(height: 10,),
 
             Padding(
-              padding: EdgeInsets.only(right: 380),
+              padding: EdgeInsets.only(right: 260),
               child: Text(
                 "추천 프로필",
                 style: TextStyle(
                   fontSize: 25,
                   fontFamily: "Pretendard",
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: Colors.black,
                 ),
               ),
             ),
 
-            Container(
-              decoration: BoxDecoration(
-                  color: Color(0xFFE0F3FF),
-              ),
-              height: 75,
+        ListView.builder(
+            shrinkWrap: true,
+            itemCount: canViewList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.only(left: 5),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE0F3FF),
+                        ),
+                        height: 70,
+                        child: Row(
+                          children: [
+                            ClipOval(
+                              child: Image.network(
+                                canViewList[index][1],
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(canViewList[index][3],
+                                  style: const TextStyle(
+                                    fontFamily: "Pretendard",
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 22,
+                                  ),),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 5),
+                                    child: Text(canViewList[index][5].substring(0, 19) + "...",
+                                    style: TextStyle(
+                                      fontFamily: "Pretendard",
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 18,
+                                    ),),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 5,),
+                    ],
+                  ),
+                onTap: () {
+                  print(index);
+                  //TODO:추가 작업 수행
+                }
+              );
+            }),
+
+        Padding(
+          padding: EdgeInsets.only(right: 275),
+          child: Text(
+            "최신 QnA",
+            style: TextStyle(
+              fontSize: 25,
+              fontFamily: "Pretendard",
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
             ),
-
-            SizedBox(height: 5,),
-
-            Container(
-              decoration: BoxDecoration(
-                color: Color(0xFFE0F3FF),
-              ),
-              height: 75,
-            ),
-
-            SizedBox(height: 5,),
-
-            Container(
-              decoration: BoxDecoration(
-                color: Color(0xFFE0F3FF),
-              ),
-              height: 75,
-            ),
-
-            SizedBox(height: 10,),
-
-            Padding(
-              padding: EdgeInsets.only(right: 390),
-              child: Text(
-                "최신 QnA",
-                style: TextStyle(
-                  fontSize: 25,
-                  fontFamily: "Pretendard",
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-
-            Container(
-              alignment: Alignment.centerLeft,
-              child: Text( " Q. "+ canViewQList[0][0], style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-              ),),
-              decoration: BoxDecoration(
-                color: Color(0xFFE0F3FF),
-              ),
-              height: 60,
-            ),
-
-            SizedBox(height: 5,),
-
-            Container(
-              alignment: Alignment.centerLeft,
-              child: Text( " Q. "+ canViewQList[0][1], style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-              ),),
-              decoration: BoxDecoration(
-                color: Color(0xFFE0F3FF),
-              ),
-              height: 60,
-            ),
-
-            SizedBox(height: 5,),
-
-            Container(
-              alignment: Alignment.centerLeft,
-              child: Text( " Q. "+ canViewQList[0][2], style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-              ),),
-              decoration: BoxDecoration(
-                color: Color(0xFFE0F3FF),
-              ),
-              height: 60,
-            ),
-
-            SizedBox(height: 5,),
-          ],
+          ),
         ),
-      ),
+
+        Container(
+          alignment: Alignment.centerLeft,
+          child: Text( " Q. "+ canViewQList[0][1], style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),),
+          decoration: BoxDecoration(
+            color: Color(0xFFE0F3FF),
+          ),
+          height: 60,
+        ),
+
+        SizedBox(height: 5,),
+
+        Container(
+          alignment: Alignment.centerLeft,
+          child: Text( " Q. "+ canViewQList[1][1], style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),),
+          decoration: BoxDecoration(
+            color: Color(0xFFE0F3FF),
+          ),
+          height: 60,
+        ),
+
+        SizedBox(height: 5,),
+
+        Container(
+          alignment: Alignment.centerLeft,
+          child: Text( " Q. "+ canViewQList[2][1], style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),),
+          decoration: BoxDecoration(
+            color: Color(0xFFE0F3FF),
+          ),
+          height: 60,
+        ),
+
+        SizedBox(height: 5,),
+
+          ]),
+        ),
     );
   }
 }
