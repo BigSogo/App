@@ -43,6 +43,8 @@ class CommentRequest {
 
 class _QAnswerState extends State<QAnswer>{
   TextEditingController commentController = TextEditingController();
+  TextEditingController _textEditingController = TextEditingController();
+
 
   @override
   void initState() {
@@ -84,6 +86,80 @@ class _QAnswerState extends State<QAnswer>{
       client.close();
     }
   }
+
+  //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
+  //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
+
+  Future<void> deleteComment(int cId) async {
+    final String url = 'http://152.67.214.13:8080/comment/$cId'; // 서버의 Comment API URL로 변경하세요.
+
+    print("deleteComment 실행 확인");
+
+    final client = http.Client();
+    try {
+      final response = await client.delete(
+        Uri.parse(url),
+        headers: {
+          HttpHeaders.authorizationHeader: userInfo,
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+      );
+
+      print("response 요청 확인");
+
+      if (response.statusCode == 200) {
+        print('댓글이 삭제되었습니다.');
+        await takeComment(int.parse(widget.clickQList[0]));
+        // 화면 갱신
+        setState(() {});
+      } else {
+        print('댓글 삭제 실패. Status code: ${response.statusCode}' + response.body);
+      }
+    } finally {
+      client.close();
+    }
+  }
+
+
+  Future<void> updateComment(int commentId, String updatedContent) async {
+    final String url = 'http://152.67.214.13:8080/comment'; // 실제 서버 URL로 변경하세요.
+
+    // 준비된 데이터
+    Map<String, dynamic> data = {
+      'comment_id': commentId,
+      'content': updatedContent,
+    };
+
+    // 데이터를 JSON 형태로 변환
+    String jsonData = jsonEncode(data);
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        body: jsonData,
+        headers: {
+          HttpHeaders.authorizationHeader: userInfo,
+          HttpHeaders.contentTypeHeader: 'application/json',
+        }
+      );
+
+      if (response.statusCode == 200) {
+        print('댓글이 성공적으로 업데이트되었습니다.');
+
+        await takeComment(int.parse(widget.clickQList[0]));
+        // 화면 갱신
+        setState(() {});
+
+      } else {
+        print('댓글 업데이트 실패. Status code: ${response.statusCode}' + response.body);
+      }
+    } catch (e) {
+      print('오류 발생: $e');
+    }
+  }
+
+  //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
+  //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
 
   static final storage = FlutterSecureStorage(); // FlutterSecureStorage를 storage로 저장
   dynamic userInfo = ''; // storage에 있는 유저 정보를 저장
@@ -215,8 +291,82 @@ class _QAnswerState extends State<QAnswer>{
     );
   }
 
+  void _showDeleteCheckDialog(int cId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('확인'),
+          content: Text('정말로 댓글을 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // 팝업 닫기
+              },
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                // 동작 수행
+                deleteComment(cId);
+                // 팝업 닫기
+                Navigator.pop(context);
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  void _showMoreOptions(BuildContext context, int cmtId) {
+  Future<void> showEditablePopup(BuildContext context, int index) async {
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('댓글 수정'),
+          content: TextField(
+            controller: _textEditingController,
+            decoration: InputDecoration(
+              hintText: '댓글을 수정해주세요.',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 닫기 버튼
+              },
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                String editedText = _textEditingController.text;
+                // 수정된 내용 사용
+                print('Edited Text: $editedText');
+                Navigator.of(context).pop(); // 닫기 버튼
+
+                updateComment(int.parse(commentList[index][0]), editedText);
+              },
+              child: Text('저장하기'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> editPopupSetting(String content, int index) async {
+    _textEditingController.text = content;
+
+    showEditablePopup(context, index);
+  }
+
+//========//========//========//========//========//========//========//========//========
+//========//========//========//========//========//========//========//========//========
+
+  void _showMoreOptions(BuildContext context, int cmtId, int index) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -231,6 +381,8 @@ class _QAnswerState extends State<QAnswer>{
                 onTap: () {
                   // 수정하기 로직을 추가하세요.
                   Navigator.pop(context);
+
+                  editPopupSetting(commentList[index][4], index);
                 },
               ),
               ListTile(
@@ -239,6 +391,8 @@ class _QAnswerState extends State<QAnswer>{
                 onTap: () {
                   // 삭제하기 로직을 추가하세요.
                   Navigator.pop(context);
+
+                  _showDeleteCheckDialog(int.parse(commentList[index][0]));
                 },
               ),
             ],
@@ -428,7 +582,7 @@ class _QAnswerState extends State<QAnswer>{
                                              ? Padding(
                                               padding: const EdgeInsets.only(left: 100),
                                               child: IconButton(onPressed: (){
-                                                _showMoreOptions(context, int.parse(commentList[index][0]));
+                                                _showMoreOptions(context, int.parse(commentList[index][0]), index);
 
                                               }, icon: Icon(Icons.more_vert)),
                                             ) : Text("")
