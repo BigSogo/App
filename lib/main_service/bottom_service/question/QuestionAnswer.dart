@@ -250,7 +250,6 @@ class _QAnswerState extends State<QAnswer>{
         child: Column(
           children: [
             Container(
-              height: 240,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -284,7 +283,7 @@ class _QAnswerState extends State<QAnswer>{
                         ],
                       ),
                       Container(
-                        height: 70,
+                        height: 100,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
@@ -442,7 +441,7 @@ class _QAnswerState extends State<QAnswer>{
                       );
                     }),
               ),
-            ) : Container(height: 420, child: Center(child: Text("작성된 답글이 없습니다."))),
+            ) : Container(height: 410, child: Center(child: Text("작성된 답글이 없습니다."))),
 
             //=======//=======//=======//=======//=======//=======//=======//=======//=======//=======
             Row(

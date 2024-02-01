@@ -115,12 +115,14 @@ class _BarControlState extends State<BarControl> {
             for (int j = 0; j < userList[i].major.length; j++) {
               majorList += " #" + userList[i].major[j];
             }
+
           }
         });
         print("터진곳 확인용 로그5");
-
-
         print("userList : $userList");
+
+
+        print("canUserData : $canUserData");
 
         return userList;
 

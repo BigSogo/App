@@ -19,6 +19,7 @@ class _NotificationViewState extends State<NotificationView>{
       ),
       body: Container(
         height: 130,
+        margin: EdgeInsets.only(bottom: 10),
         width: double.infinity,
         color: Color(0xFFE0F3FF),
         child: Padding(
