@@ -137,7 +137,7 @@ class _QnAState extends State<QnA> {
   //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
   //=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====//=====
 
-  Future<void> deleteComment(int questId) async {
+  Future<void> deleteQuestion(int questId) async {
     final String url = 'http://152.67.214.13:8080/question/$questId'; // 서버의 Comment API URL로 변경하세요.
 
     print("deleteQuestion 실행 확인");
@@ -184,7 +184,7 @@ class _QnAState extends State<QnA> {
             TextButton(
               onPressed: () {
                 // 동작 수행
-                deleteComment(questId);
+                deleteQuestion(questId);
                 // 팝업 닫기
                 Navigator.pop(context);
               },
@@ -199,12 +199,12 @@ class _QnAState extends State<QnA> {
   //====//====//====//====//====//====//====//====//====//====//====//====//====//====//====
 
 
-  Future<void> updateComment(int commentId, String updatedContent) async {
-    final String url = 'http://152.67.214.13:8080/comment'; // 실제 서버 URL로 변경하세요.
+  Future<void> updateQuestion(int questId, String updateTitle, String updatedContent) async {
+    final String url = 'http://152.67.214.13:8080/question/$questId'; // 실제 서버 URL로 변경하세요.
 
     // 준비된 데이터
     Map<String, dynamic> data = {
-      'comment_id': commentId,
+      'title' : updateTitle,
       'content': updatedContent,
     };
 
@@ -216,20 +216,21 @@ class _QnAState extends State<QnA> {
           Uri.parse(url),
           body: jsonData,
           headers: {
+            'accept': 'application/json', // 이 부분을 추가
             HttpHeaders.authorizationHeader: userInfo,
             HttpHeaders.contentTypeHeader: 'application/json',
           }
       );
 
       if (response.statusCode == 200) {
-        print('댓글이 성공적으로 업데이트되었습니다.');
+        print('질문이 성공적으로 업데이트되었습니다.');
 
         await fetchData();
         // 화면 갱신
         setState(() {});
 
       } else {
-        print('댓글 업데이트 실패. Status code: ${response.statusCode}' + response.body);
+        print('질문 업데이트 실패. Status code: ${response.statusCode}' + response.body);
       }
     } catch (e) {
       print('오류 발생: $e');
@@ -237,24 +238,37 @@ class _QnAState extends State<QnA> {
   }
 
   Future<void> showEditablePopup(BuildContext context, int index) async {
-
     return showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('댓글 수정'),
+          title: Text('질문 수정'),
           content: Column(
             children: [
               TextField(
                 controller: _titleEditingController,
+                keyboardType: TextInputType.multiline,
+                maxLines: null, // 무제한으로 설정하여 자동으로 높이 조절
                 decoration: InputDecoration(
-                  hintText: '댓글을 수정해주세요.',
+                  hintText: '제목을 수정해주세요.',
+                  labelText: '제목', //
+                  labelStyle: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600
+                  )// 트 // 힌트 대신 라벨 사용
                 ),
               ),
               TextField(
                 controller: _contentTextEditingController,
+                keyboardType: TextInputType.multiline,
+                maxLines: null, // 무제한으로 설정하여 자동으로 높이 조절
                 decoration: InputDecoration(
-                  hintText: '추가 텍스트 필드',
+                  hintText: '내용을 수정해주세요.',
+                  labelText: '내용', // 힌
+                  labelStyle: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600
+                  )// 트 대신 라벨 사용
                 ),
               ),
             ],
@@ -268,14 +282,14 @@ class _QnAState extends State<QnA> {
             ),
             TextButton(
               onPressed: () {
-                String editedText = _titleEditingController.text;
-                String secondText = _contentTextEditingController.text;
+                String titleText = _titleEditingController.text;
+                String contentText = _contentTextEditingController.text;
                 // 수정된 내용 사용
-                print('Edited Text: $editedText');
-                print('Second Text: $secondText');
+                print('Edited Title: $titleText');
+                print('Edited Content: $contentText');
                 Navigator.of(context).pop(); // 닫기 버튼
 
-                updateComment(int.parse(commentList[index][0]), editedText);
+                updateQuestion(int.parse(canViewQList[index][0]), titleText, contentText);
               },
               child: Text('저장하기'),
             ),
@@ -285,9 +299,10 @@ class _QnAState extends State<QnA> {
     );
   }
 
-  Future<void> editPopupSetting(String content, int index) async {
-    _titleEditingController.text = content;
-    _contentTextEditingController.text = ''; // 추가 텍스트 필드 초기화
+
+  Future<void> editPopupSetting(String title, String content, int index) async {
+    _titleEditingController.text = title;
+    _contentTextEditingController.text = content; // 추가 텍스트 필드 초기화
 
     showEditablePopup(context, index);
   }
@@ -312,7 +327,7 @@ class _QnAState extends State<QnA> {
                   // 수정하기 로직을 추가하세요.
                   Navigator.pop(context);
 
-
+                  editPopupSetting(canViewQList[index][1], canViewQList[index][4], index);
 
                 },
               ),

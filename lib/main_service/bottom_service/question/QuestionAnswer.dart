@@ -321,7 +321,6 @@ class _QAnswerState extends State<QAnswer>{
   }
 
   Future<void> showEditablePopup(BuildContext context, int index) async {
-
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -329,6 +328,8 @@ class _QAnswerState extends State<QAnswer>{
           title: Text('댓글 수정'),
           content: TextField(
             controller: _textEditingController,
+            keyboardType: TextInputType.multiline,
+            maxLines: null, // 무제한으로 설정하여 자동으로 높이 조절
             decoration: InputDecoration(
               hintText: '댓글을 수정해주세요.',
             ),
@@ -356,6 +357,7 @@ class _QAnswerState extends State<QAnswer>{
       },
     );
   }
+
 
   Future<void> editPopupSetting(String content, int index) async {
     _textEditingController.text = content;
