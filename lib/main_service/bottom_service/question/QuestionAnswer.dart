@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'dart:convert';
 
 import '../../data/question_1.dart';
-import '../UserDataModel.dart';
+import '../../data/UserDataModel.dart';
 
 var iconColor = Color(0xFFA8A8A8);
 String thisUserName = "";
@@ -27,6 +28,7 @@ class QAnswer extends StatefulWidget {
 }
 
 class CommentRequest {
+  Logger logger = Logger();
   String content;
   int questionId;
 
@@ -43,6 +45,8 @@ class CommentRequest {
 //=============//=============//=============//=============//=============
 
 class _QAnswerState extends State<QAnswer>{
+
+  Logger logger = Logger();
   TextEditingController commentController = TextEditingController();
   TextEditingController _textEditingController = TextEditingController();
 
@@ -50,6 +54,7 @@ class _QAnswerState extends State<QAnswer>{
   @override
   void initState() {
     super.initState();
+    logger.d("${widget.clickQList}");
     takeComment(int.parse(widget.clickQList[0]));
     asyncMethod();
   }

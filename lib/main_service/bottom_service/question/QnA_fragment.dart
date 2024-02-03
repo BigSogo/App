@@ -10,7 +10,7 @@ import 'dart:convert';
 
 import 'package:bigsogo/main_service/data/publickQ_data.dart';
 
-import '../UserDataModel.dart';
+import '../../data/UserDataModel.dart';
 
 List<List<String>> canViewQList = [];
 String majorList = "";

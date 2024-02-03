@@ -216,6 +216,7 @@ class _LogInState extends State<LogIn>{
         context,
         MaterialPageRoute(builder: (context) => BarControl()),
       );
+      // Navigator.pop(context);
     }
     else{
       logger.e("message : ${response.body}");

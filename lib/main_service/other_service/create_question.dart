@@ -7,7 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
-import '../bottom_service/UserDataModel.dart';
+import '../data/UserDataModel.dart';
 import '../bottom_service/question/QnA_fragment.dart';
 
 
@@ -59,7 +59,7 @@ class _CreateQState extends State<CreateQ> {
       final response = await http.get(Uri.parse("http://10.1.8.72:8080/user"), headers: {HttpHeaders.authorizationHeader:userInfo});
 
       var result = BaseUserData.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
-      // 서버코드가 200으로 왔을 때 성ㄱ공
+      // 서버코드가 200으로 왔을 때 성공
       print("statusCode : ${result.data}");
       if (result.code == 200){
         // 여기서 서버에서 받은 데이터로 잘 하시면 됨니다.

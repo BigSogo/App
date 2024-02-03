@@ -100,9 +100,9 @@ class _MajorState extends State<Major> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Column(
+      body: Stack(
+        children:[
+          Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             SizedBox(height: 100,),
@@ -130,18 +130,24 @@ class _MajorState extends State<Major> {
               ),
             ),
             SizedBox(height: 20),
-            // 체크박스 목록 추가
-            for (var entry in majors.entries)
-              CheckboxListTile(
-                title: Text(entry.key),
-                value: entry.value,
-                onChanged: (bool? value) {
-                  setState(() {
-                    majors[entry.key] = value!;
-                    updateSelectedMajors(entry.key, value);
-                  });
-                },
+            SingleChildScrollView(
+              child:Column(
+                children: [
+                  for (var entry in majors.entries)
+                    CheckboxListTile(
+                      title: Text(entry.key),
+                      value: entry.value,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          majors[entry.key] = value!;
+                          updateSelectedMajors(entry.key, value);
+                        });
+                      },
+                    ),
+                ],
               ),
+            ),
+            // 체크박스 목록 추가
 
             Container(
               width: double.infinity,
@@ -176,8 +182,16 @@ class _MajorState extends State<Major> {
                 )),
               ),
             ),
+            Positioned(
+              bottom: 0,
+              child: Container(
+                width: 450,
+                height: 150,
+                color: Colors.redAccent,
+              ),
+            )
           ],
-        ),
+        ),]
       ),
     );
   }

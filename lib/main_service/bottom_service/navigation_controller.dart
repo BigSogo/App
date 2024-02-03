@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:bigsogo/main_service/bottom_service/home_fragment.dart';
 import 'package:bigsogo/main_service/bottom_service/question/QnA_fragment.dart';
-import 'package:bigsogo/main_service/bottom_service/setting_fragment.dart';
+import 'package:bigsogo/main_service/bottom_service/setting/setting_fragment.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';

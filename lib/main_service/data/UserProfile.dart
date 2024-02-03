@@ -1,5 +1,5 @@
 
-class BaseProfileData<UserProfile>{
+class BaseProfileData{
   final int code;
   final String message;
   final UserProfile data;
@@ -12,9 +12,9 @@ class BaseProfileData<UserProfile>{
 
   factory BaseProfileData.fromJson(Map<String, dynamic> json){
     return BaseProfileData(
-      code: json['code'],
-      message: json['message'],
-      data: json['data'] ,
+        code: json['code'],
+        message: json['message'],
+        data: UserProfile.fromJson(json['data'])
     );
   }
 }
@@ -22,10 +22,12 @@ class BaseProfileData<UserProfile>{
 class UserProfile{
   final UserDataJS user;
   final List<ProfileProfilesData> profiles;
+
   UserProfile({
     required this.user,
     required this.profiles
   });
+
   factory UserProfile.fromJson(Map<String, dynamic> json){
     return UserProfile(
         user: UserDataJS.fromJson(json['user']),
@@ -33,12 +35,13 @@ class UserProfile{
     );
   }
 }
+
 class UserDataJS{
   final int id;
   final String profile_img;
   final String email;
   final String username;
-  final String description;
+  final String? description;
   final List<String> major;
 
   UserDataJS({
@@ -52,11 +55,11 @@ class UserDataJS{
 
   factory UserDataJS.fromJson(Map<String, dynamic> json){
     return UserDataJS(
-        id: json['id'],
-        profile_img: json['profile_img'],
-        email: json['email'],
-        username: json['username'],
-        description: json['description'],
+        id: json['id'] ?? 0,
+        profile_img: json['profile_img'] ?? "https://static.wikia.nocookie.net/p__/images/8/8a/Shiro_.png/revision/latest?cb=20210703182454&path-prefix=protagonist",
+        email: json['email'] ?? "",
+        username: json['username'] ?? "",
+        description: json['description'] ?? "설명이 없엉요",
         major: List<String>.from(json['major']),
     );
   }
@@ -83,4 +86,4 @@ class ProfileProfilesData{
         portfolio_url: json['portfolio_url']
     );
   }
-} //test용
+}
