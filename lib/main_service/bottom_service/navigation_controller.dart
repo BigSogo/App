@@ -294,7 +294,7 @@ class _BarControlState extends State<BarControl> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Container(
+                                    ClipOval(
                                       child: Image.network(
                                         canUserData[index][0],
                                         width: 70,
@@ -305,18 +305,13 @@ class _BarControlState extends State<BarControl> {
                                     Column(
                                       children: [
                                         Text(canUserData[index][1]),
-                                        Container(
-                                          height: 20,
-                                          child: RichText(
-                                            text: TextSpan(
-                                              text: majorList,
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
+                                        Text(
+                                          majorList,
+                                          style: TextStyle(
+                                            fontSize: 10,
                                           ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
                                         ),
 
                                       ],
@@ -360,12 +355,12 @@ class _BarControlState extends State<BarControl> {
                             itemBuilder: (BuildContext context, int index) {
                               return GestureDetector(
                                 onTap: () {
-                                  print(index);
+                                  print("clicked index is ${QnAdataId[index]-1}");
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => QAnswer(
-                                        canViewQList[QnAdataId[index]-1],
+                                        QnAdataId[index],
                                       ),
                                     ),
                                   );

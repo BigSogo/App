@@ -14,13 +14,14 @@ import '../../data/UserDataModel.dart';
 var iconColor = Color(0xFFA8A8A8);
 String thisUserName = "";
 List<List<String>> commentList = [];
+List<String> clickQList = []; // 클릭한 질문의 데이터를 받을 변수 추가
 
 //=============//=============//=============//=============//=============
 
 class QAnswer extends StatefulWidget {
-  final List<String> clickQList; // 클릭한 질문의 데이터를 받을 변수 추가
+  final int questionId;
 
-  QAnswer(this.clickQList); // 생성자 수정
+  QAnswer(this.questionId); // 생성자 수정
 
 
   @override
@@ -54,8 +55,7 @@ class _QAnswerState extends State<QAnswer>{
   @override
   void initState() {
     super.initState();
-    logger.d("${widget.clickQList}");
-    takeComment(int.parse(widget.clickQList[0]));
+    takeComment(widget.questionId);
     asyncMethod();
   }
 
@@ -82,7 +82,7 @@ class _QAnswerState extends State<QAnswer>{
 
       if (response.statusCode == 200) {
         print('댓글이 추가되었습니다.');
-        await takeComment(int.parse(widget.clickQList[0]));
+        await takeComment(widget.questionId);
         // 화면 갱신
         setState(() {});
       } else {
@@ -115,7 +115,7 @@ class _QAnswerState extends State<QAnswer>{
 
       if (response.statusCode == 200) {
         print('댓글이 삭제되었습니다.');
-        await takeComment(int.parse(widget.clickQList[0]));
+        await takeComment(widget.questionId);
         // 화면 갱신
         setState(() {});
 
@@ -166,7 +166,7 @@ class _QAnswerState extends State<QAnswer>{
       if (response.statusCode == 200) {
         print('댓글이 성공적으로 업데이트되었습니다.');
 
-        await takeComment(int.parse(widget.clickQList[0]));
+        await takeComment(widget.questionId);
         // 화면 갱신
         Fluttertoast.showToast(
           msg: "변경되었습니다.",
@@ -235,7 +235,6 @@ class _QAnswerState extends State<QAnswer>{
 
   Future<void> takeComment(int quesId) async {
     print("Future<Question1> 작동죔, keyWord: $quesId");
-    print(widget.clickQList[5]);
     try {
       final response = await http.get(
           Uri.parse('http://152.67.214.13:8080/question/?id=${quesId.toString()}')
@@ -256,6 +255,15 @@ class _QAnswerState extends State<QAnswer>{
 
         setState(() {
           commentList.clear();
+          clickQList.clear();
+
+          clickQList.add(result.data.title);
+          clickQList.add(result.data.content);
+          clickQList.add(result.data.writer.profileImg);
+          clickQList.add(result.data.writer.username);
+          clickQList.add(result.data.writer.major.join(' #'));
+
+
 
           for (int i = 0; i < result.data.comments.length; i++) {
             List<String> row = [];
@@ -306,7 +314,7 @@ class _QAnswerState extends State<QAnswer>{
             TextButton(
               onPressed: () {
                 // 동작 수행
-                addComment(commentController.text, int.parse(widget.clickQList[0]));
+                addComment(commentController.text, widget.questionId);
                 commentController.clear(); // 댓글 추가 후 텍스트 필드 내용 초기화
 
                 // 팝업 닫기
@@ -477,7 +485,7 @@ class _QAnswerState extends State<QAnswer>{
                         children: [
                           Expanded(
                             child: Text(
-                              " Q. " + widget.clickQList[1],
+                              " Q. " + clickQList[0],
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 22,
@@ -489,13 +497,13 @@ class _QAnswerState extends State<QAnswer>{
                         ],
                       ),
                       Container(
-                        height: 100,
+
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Expanded(
                               child: Text(
-                                  widget.clickQList[4],
+                                  clickQList[1],
                                   style: TextStyle(
                                     fontWeight: FontWeight.w300,
                                     fontSize: 15,
@@ -513,7 +521,7 @@ class _QAnswerState extends State<QAnswer>{
                         children: [
                           ClipOval(
                             child: Image.network(
-                              widget.clickQList[2],
+                              clickQList[2],
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
@@ -529,7 +537,7 @@ class _QAnswerState extends State<QAnswer>{
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Text(
-                                      widget.clickQList[3],
+                                      clickQList[3],
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.w600,
@@ -544,7 +552,7 @@ class _QAnswerState extends State<QAnswer>{
                                 width: 300,
                                 child: Expanded(
                                   child: Text(
-                                      widget.clickQList[5],
+                                      clickQList[4],
                                       style: TextStyle(
                                         fontSize: 13,
                                       ),
@@ -562,101 +570,6 @@ class _QAnswerState extends State<QAnswer>{
                 ),
               ),
             ),
-
-
-             // 이 부분에 ListView.builder를 사용해서 commentList값 넣기
-            commentList.length > 0 ? Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: 400,
-                child: ListView.builder(
-                    itemCount: commentList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border(
-                                bottom: BorderSide(
-                                    color: Color(0xFF15273E),
-                                    width: 1
-                                )
-                            ),
-                          ),
-        
-                          child:
-                          Column(
-                            children: [
-                              Row(
-                                children: [
-                                  ClipOval(
-                                    child: Image.network(
-                                      commentList[index][1],
-                                      width: 70,
-                                      height: 70,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start, // 수직 방향으로 시작점에 맞추도록 설정
-        
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              commentList[index][2],
-                                              maxLines: 1, // 최대 표시할 줄 수
-                                              overflow: TextOverflow.ellipsis, // 넘칠 경우 "..."으로 표시
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 15,
-                                              ),
-                                            ),
-
-                                            commentList[index][2] == thisUserName
-                                             ? Padding(
-                                              padding: const EdgeInsets.only(left: 100),
-                                              child: IconButton(onPressed: (){
-                                                _showMoreOptions(context, int.parse(commentList[index][0]), index);
-
-                                              }, icon: Icon(Icons.more_vert)),
-                                            ) : Text("")
-                                          ],
-                                        ),
-
-                                        Text(commentList[index][3],
-                                          style: TextStyle(
-                                              fontSize: 12
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                              Container(
-                                width : 350,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text("A. " + commentList[index][4],
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600
-                                  ),),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-            ) : Container(height: 410, child: Center(child: Text("작성된 답글이 없습니다."))),
 
             //=======//=======//=======//=======//=======//=======//=======//=======//=======//=======
             Row(
@@ -705,7 +618,7 @@ class _QAnswerState extends State<QAnswer>{
                         // 검색 버튼을 눌렀을 때의 동작
 
                         if (commentController.text.isNotEmpty) {
-                          print(widget.clickQList[0]);
+                          print(widget.questionId);
                           _showConfirmationDialog();
                         }
                       },
@@ -716,6 +629,111 @@ class _QAnswerState extends State<QAnswer>{
               ],
             ),
             //=======//=======//=======//=======//=======//=======//=======//=======//=======//=======
+
+
+             // 이 부분에 ListView.builder를 사용해서 commentList값 넣기
+            commentList.length > 0 ? Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                height: 500,
+                child: ListView.builder(
+                    itemCount: commentList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: Color(0xFF15273E),
+                                    width: 1
+                                )
+                            ),
+                          ),
+
+                          child:
+                          Column(
+                            children: [
+                              Row(
+                                children: [
+                                  ClipOval(
+                                    child: Image.network(
+                                      commentList[index][1],
+                                      width: 70,
+                                      height: 70,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start, // 수직 방향으로 시작점에 맞추도록 설정
+
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              commentList[index][2],
+                                              maxLines: 1, // 최대 표시할 줄 수
+                                              overflow: TextOverflow.ellipsis, // 넘칠 경우 "..."으로 표시
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+
+                                            commentList[index][2] == thisUserName
+                                             ? Padding(
+                                              padding: const EdgeInsets.only(left: 100),
+                                              child: IconButton(onPressed: (){
+                                                _showMoreOptions(context, int.parse(commentList[index][0]), index);
+
+                                              }, icon: Icon(Icons.more_vert)),
+                                            ) : Text("")
+                                          ],
+                                        ),
+
+                                        Container(
+                                          height: 20,
+                                          width: 280,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(commentList[index][3],
+                                                  style: TextStyle(
+                                                      fontSize: 12
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                              ),
+                                            ]
+                                          ),
+                                        ),
+
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Container(
+                                width : 350,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text("A. " + commentList[index][4],
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600
+                                  ),),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+            ) : Container(height: 410, child: Center(child: Text("작성된 답글이 없습니다."))),
 
           ],
         ),

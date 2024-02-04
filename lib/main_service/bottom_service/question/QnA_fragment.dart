@@ -370,7 +370,7 @@ class _QnAState extends State<QnA> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => QAnswer(
-                    canViewQList[index],
+                    int.parse(canViewQList[index][0]),
                   ),
                 ),
               );

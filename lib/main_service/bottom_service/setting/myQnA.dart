@@ -100,7 +100,7 @@ class _MyQnA extends State<MyQnA> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => QAnswer(
-                                dataList
+                                int.parse(dataList[0])
                               )),
                             );
                           },
